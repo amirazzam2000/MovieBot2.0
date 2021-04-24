@@ -9,7 +9,7 @@ URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 
 class BotManager:
     def __init__(self):
-        self.url = URL
+        self.url = URL  # comment
         self.database = DatabaseConnector()
 
     def get_url(self, url):
