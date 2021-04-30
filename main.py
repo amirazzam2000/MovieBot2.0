@@ -1,5 +1,6 @@
 import time
 from Telegram.BotManager import BotManager
+from DatabseMangement.DataManagers.MoviesManger import MoviesManager
 
 
 def main():
@@ -13,5 +14,9 @@ def main():
         time.sleep(0.5)
 
 
+def test_main():
+    movies = MoviesManager()
+
+
 if __name__ == '__main__':
-    main()
+    test_main()
