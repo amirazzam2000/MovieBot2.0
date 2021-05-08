@@ -1,4 +1,7 @@
 import time
+
+from NLP.SentimentAnalyzer import SentimentAnalyzer
+from PersonalityTest.QuestionsManager import QuestionsManager
 from Telegram.BotManager import BotManager
 from DatabseMangement.DataManagers.MoviesManger import MoviesManager
 
@@ -21,4 +24,6 @@ def test_question():
     bot.chat()
 
 if __name__ == '__main__':
+    # sentimentAnalysis = SentimentAnalyzer()
+    # questionManger = QuestionsManager()
     test_question()

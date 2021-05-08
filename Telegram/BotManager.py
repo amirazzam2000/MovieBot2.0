@@ -2,6 +2,7 @@ import json
 import requests
 import urllib
 from DatabseMangement.DatabaseConnector import DatabaseConnector
+from NLP.SentimentAnalyzer import SentimentAnalyzer
 
 TOKEN = "1647856948:AAHQuR604ulbthVjdAFCgrROaDiq87_qxE4"
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
@@ -11,6 +12,8 @@ class BotManager:
     def __init__(self):
         self.url = URL  # comment
         self.database = DatabaseConnector()
+        self.sentimentAnalyzer = SentimentAnalyzer()
+        self.db = DatabaseConnector()
 
     def get_url(self, url):
         response = requests.get(url)
@@ -55,8 +58,39 @@ class BotManager:
 
     def chat(self):
         last_textchat = (None, None)
+        flag = False
+        intent = -1
         while True:
+
             text, chat = self.get_last_chat_id_and_text(self.get_updates())
+
             if (text, chat) != last_textchat:
-                self.send_message(text, chat)
+
+                if text.lower() == "hello":
+                    flag = False
+
+                if not flag:
+                    if text.lower() == "hello":
+
+                        if self.db.get_user(chat).empty:  # New user ( not in the database)
+                            self.send_message("Welcome! 👋", chat)
+                            self.send_message("I'm the movie bot. What's your name?", chat)
+                            intent = 1
+
+                        else:  # Existing user
+                            self.send_message("Do you want to do a really quick test now?", chat)
+                            self.send_message("I just want to know what kind of movies you like 🍿", chat)
+
+                else:
+                    if intent == 1:
+                        self.send_message("Hi " + text + "! I'm very happy to meet you.", chat)
+                        self.db.add_user(chat, text)
+                    else:
+                        if self.sentimentAnalyzer.analyze_sentence(text) == "Positive":
+                            self.send_message("Great 😄", chat)
+                            self.send_message("Let's get started", chat)
+                        else:
+                            self.send_message("Okay! Just let me know if you ever want to do the test", chat)
+
+                flag = not flag
                 last_textchat = (text, chat)
