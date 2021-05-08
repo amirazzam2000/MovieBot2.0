@@ -1,0 +1,103 @@
+[
+  {
+        "question": "Do you like to be alone?",
+        "genres": [
+                    {
+                        "name": "drama",
+                        "weight": 10
+                    }
+        ]
+  },
+  {
+        "question": "If you had the chance, would you like to be part of a Harry Potter or Star Wars movie?",
+        "genres": [
+                    {
+                        "name": "sci-fi",
+                        "weight": 10
+                    },
+                    {
+                        "name": "fantasy",
+                        "weight": 9
+                    },
+                    {
+                        "name": "action",
+                        "weight": 5
+                    }
+        ]
+  },
+   {
+        "question": "I love family celebrations",
+        "genres": [
+                    {
+                        "name": "family",
+                        "weight": 10
+                    }
+        ]
+  },
+  {
+        "question": "Do you like love stories?",
+        "genres": [
+                    {
+                        "name": "romance",
+                        "weight": 10
+                    }
+        ]
+  },
+  {
+        "question": "I love hearing jokes",
+        "genres": [
+                    {
+                        "name": "comedy",
+                        "weight": 10
+                    }
+        ]
+  },
+  {
+        "question": "Do you like haunted houses?",
+        "genres": [
+                    {
+                        "name": "horror",
+                        "weight": 10
+                    },
+                    {
+                        "name": "thriller",
+                        "weight": 9
+                    }
+        ]
+  },
+  {
+        "question": "I enjoy learning about historical events.",
+        "genres": [
+                    {
+                        "name": "history",
+                        "weight": 10
+                    },
+                    {
+                        "name": "western",
+                        "weight": 3
+                    }
+        ]
+  },
+  {
+        "question": "Do you like surprises and suspense?",
+        "genres": [
+                    {
+                        "name": "thriller",
+                        "weight": 10
+                    },
+                    {
+                        "name": "adventure",
+                        "weight": 7
+                    }
+        ]
+  },
+  {
+        "question": "When I hear music I can't help but sing along to.",
+        "genres": [
+                    {
+                        "name": "musical",
+                        "weight": 9
+                    }
+        ]
+  }
+]

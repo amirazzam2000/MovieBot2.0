@@ -2,7 +2,6 @@ import time
 from Telegram.BotManager import BotManager
 from DatabseMangement.DataManagers.MoviesManger import MoviesManager
 
-
 def main():
     bot = BotManager()
     last_update_id = None
@@ -17,6 +16,9 @@ def main():
 def test_main():
     movies = MoviesManager()
 
+def test_question():
+    bot = BotManager()
+    bot.chat()
 
 if __name__ == '__main__':
-    test_main()
+    test_question()

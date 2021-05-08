@@ -1,5 +1,8 @@
 import sqlalchemy as sql
 import pandas as pd
+import pymysql
+
+pymysql.install_as_MySQLdb()
 
 DIALECT = "mysql"
 USER = "MOVIE_USER"
@@ -14,6 +17,9 @@ class DatabaseConnector:
         self.metadata = sql.MetaData()
 
         self.users = sql.Table('USERS', self.metadata, autoload=True, autoload_with=engine)
+        self.genres = sql.Table('GENRES', self.metadata, autoload=True, autoload_with=engine)
+
+    # --------- USERS --------- #
 
     def add_user(self, user_id, name):
         df = self.get_user(user_id)
@@ -36,8 +42,28 @@ class DatabaseConnector:
         df.columns = results[0].keys()
         return df
 
+    # --------- GENRES --------- #
+
+    def get_all_genres(self) -> pd.DataFrame:
+        query = sql.select([self.genres])
+        results = self.connection.execute(query).fetchall()
+        df = pd.DataFrame(results)
+        df.columns = results[0].keys()
+        return df
+
+    def get_genre_id_by_name(self, genre):
+        query = sql.select(self.genres).where(self.genres.columns.genre == genre)
+        results = self.connection.execute(query).fetchall()
+        df = pd.DataFrame(results)
+        return df
+        #if df.size > 0:
+         #   return results[0].keys()
+        #else:
+        #    return None
 
 if __name__ == '__main__':
     db = DatabaseConnector()
     db.add_user(2, "hi")
     print(db.get_all_users())
+    print(db.get_all_genres())
+    print(db.get_genre_id_by_name('drama'))

@@ -52,3 +52,11 @@ class BotManager:
         text = urllib.parse.quote_plus(text)
         url = URL + "sendMessage?text={}&chat_id={}".format(text, chat_id)
         self.get_url(url)
+
+    def chat(self):
+        last_textchat = (None, None)
+        while True:
+            text, chat = self.get_last_chat_id_and_text(self.get_updates())
+            if (text, chat) != last_textchat:
+                self.send_message(text, chat)
+                last_textchat = (text, chat)
