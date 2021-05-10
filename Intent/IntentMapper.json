@@ -1,0 +1,10 @@
+[
+        {
+            "tag": "greeting",
+            "responses": ["Hello", "Good to see you again", "Hi there, how can I help?"],
+        },
+        {
+            "tag": "goodbye",
+            "responses": ["See you!", "Talk to you later", "Have a nice day", "Bye! Come back again soon."]
+        }
+]

@@ -64,6 +64,10 @@ class DatabaseConnector:
 if __name__ == '__main__':
     db = DatabaseConnector()
     db.add_user(2, "hi")
+    if db.get_user(3).empty:
+        print("I don't know who you are")
+    else:
+        print("hi friend")
     print(db.get_all_users())
     print(db.get_all_genres())
     print(db.get_genre_id_by_name('drama'))

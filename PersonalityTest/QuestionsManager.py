@@ -20,6 +20,9 @@ class QuestionsManager:
                 question = Question(q['question'], aux_genres);
                 self.questions.append(question)
 
+    def get_questions(self):
+        return self.questions
+
 
 if __name__ == '__main__':
     questionManger = QuestionsManager()
