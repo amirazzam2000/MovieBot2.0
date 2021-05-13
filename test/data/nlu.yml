@@ -90,3 +90,74 @@ nlu:
     - are you a human?
     - am I talking to a bot?
     - am I talking to a human?
+
+
+- intent: user_definition
+  examples: |
+    - I am [name](user_name)
+    - I am [groot]{"entity": "user_name" }
+    - I am [ameer]{"entity": "user_name" }
+    - I am [sonia]{"entity": "user_name" }
+    - I am [s]{"entity": "user_name" }
+    - I am [a]{"entity": "user_name" }
+    - I am [b]{"entity": "user_name" }
+    - I am [c]{"entity": "user_name" }
+    - I am [d]{"entity": "user_name" }
+    - I am [e]{"entity": "user_name" }
+    - I am [f]{"entity": "user_name" }
+    - I am [t]{"entity": "user_name" }
+    - I am [r]{"entity": "user_name" }
+    - I am [m]{"entity": "user_name" }
+    - my name is [groot]{"entity": "user_name" }
+    - my name is [ameer]{"entity": "user_name" }
+    - my name is [sonia]{"entity": "user_name" }
+    - my name is [s]{"entity": "user_name" }
+    - my name is [a]{"entity": "user_name" }
+    - my name is [b]{"entity": "user_name" }
+    - my name is [c]{"entity": "user_name" }
+    - my name is [d]{"entity": "user_name" }
+    - my name is [e]{"entity": "user_name" }
+    - my name is [f]{"entity": "user_name" }
+    - my name is [et]{"entity": "user_name" }
+    - my name is [r]{"entity": "user_name" }
+    - my name is [m]{"entity": "user_name" }
+
+
+- intent: movie_definition
+  examples: |
+    - I like [movie name]{"entity": "movie_name" }
+    - I like [the avengers]{"entity": "movie_name" }
+    - I like [star wars: last hope]{"entity": "movie_name" }
+    - I like [spiderman into the spiderverse]{"entity": "movie_name" }
+    - I like [twilight]{"entity": "movie_name" }
+    - I like [yesterday]{"entity": "movie_name" }
+    - I like [rocket men]{"entity": "movie_name" }
+    - I like [finding nemo]{"entity": "movie_name" }
+    - I like [the secret life of pets]{"entity": "movie_name" }
+    - I like [moonlight]{"entity": "movie_name" }
+    - I like [forrest gump]{"entity": "movie_name" }
+    - I like [ocean's 11]{"entity": "movie_name" }
+    - I like to watch [movie name]{"entity": "movie_name" }
+    - I like to watch [the avengers]{"entity": "movie_name" }
+    - I like to watch [star wars: last hope]{"entity": "movie_name" }
+    - I like to watch [spiderman into the spiderverse]{"entity": "movie_name" }
+    - I like to watch [twilight]{"entity": "movie_name" }
+    - I like to watch [yesterday]{"entity": "movie_name" }
+    - I like to watch [rocket men]{"entity": "movie_name" }
+    - I like to watch [finding nemo]{"entity": "movie_name" }
+    - I like to watch [the secret life of pets]{"entity": "movie_name" }
+    - I like to watch [moonlight]{"entity": "movie_name" }
+    - I like to watch [forrest gump]{"entity": "movie_name" }
+    - I like to watch [ocean's 11]{"entity": "movie_name" }
+    - I enjoy watching [movie name]{"entity": "movie_name" }
+    - I enjoy watching [the avengers]{"entity": "movie_name" }
+    - I enjoy watching [star wars: last hope]{"entity": "movie_name" }
+    - I enjoy watching [spiderman into the spiderverse]{"entity": "movie_name" }
+    - I enjoy watching [twilight]{"entity": "movie_name" }
+    - I enjoy watching [yesterday]{"entity": "movie_name" }
+    - I enjoy watching [rocket men]{"entity": "movie_name" }
+    - I enjoy watching [finding nemo]{"entity": "movie_name" }
+    - I enjoy watching [the secret life of pets]{"entity": "movie_name" }
+    - I enjoy watching [moonlight]{"entity": "movie_name" }
+    - I enjoy watching [forrest gump]{"entity": "movie_name" }
+    - I enjoy watching [ocean's 11]{"entity": "movie_name" }
