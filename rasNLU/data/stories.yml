@@ -28,3 +28,55 @@ stories:
   - action: utter_did_that_help
   - intent: deny
   - action: utter_goodbye
+
+- story: interactive_story_1
+  steps:
+  - intent: movie_definition
+  - intent: movie_definition
+    entities:
+    - movies_definition: bay watch
+  - intent: movie_definition
+    entities:
+    - movie_name: yesterday
+  - intent: movie_definition
+    entities:
+    - movie_name: the house
+  - intent: movie_definition
+  - intent: movie_definition
+    entities:
+    - movie_name: the stars
+
+- story: interactive_story_1
+  steps:
+  - intent: movie_definition
+    entities:
+    - movie_definition: bay watch
+  - intent: movie_definition
+    entities:
+    - movie_definition: bay watch
+  - intent: affirm
+  - action: utter_happy
+  - intent: movie_definition
+    entities:
+    - movie_name: last dance
+  - intent: movie_definition
+    entities:
+    - movie_name: the circus
+  - intent: movie_definition
+    entities:
+    - movie_name: pitch perfect
+  - intent: movie_definition
+    entities:
+    - movie_name: maybe I will
+
+- story: interactive_story_1
+  steps:
+  - intent: movie_definition
+    entities:
+    - movie_definition: bay watch
+  - intent: movie_definition
+    entities:
+    - movie_name: high school musical
+  - intent: movie_definition
+    entities:
+    - movie_name: footlose
