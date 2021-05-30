@@ -1,8 +1,6 @@
 import json
 import requests
 import urllib
-from DatabseMangement.DatabaseConnector import DatabaseConnector
-from NLP.SentimentAnalyzer import SentimentAnalyzer
 
 TOKEN = "1647856948:AAHQuR604ulbthVjdAFCgrROaDiq87_qxE4"
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
@@ -10,10 +8,7 @@ URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 
 class BotManager:
     def __init__(self):
-        self.url = URL  # comment
-        self.database = DatabaseConnector()
-        self.sentimentAnalyzer = SentimentAnalyzer()
-        self.db = DatabaseConnector()
+        self.url = URL
 
     def get_url(self, url):
         response = requests.get(url)
