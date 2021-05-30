@@ -131,4 +131,4 @@ Resources/MovieSummaries.tar/*
 
 test/models/*.tar.gz
 .vscode
-
+.idea
