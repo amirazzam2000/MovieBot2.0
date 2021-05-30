@@ -3,6 +3,7 @@ import datetime as dt
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 from sklearn.metrics.pairwise import cosine_similarity
+from colors import blue, red, yellow, green
 import difflib
 import numpy as np 
 import math 
@@ -11,12 +12,14 @@ import array
 
 class MoviesManager:
     def __init__(self):
-        movies_df = pd.read_csv('../Resources/modified_movies.csv', low_memory=False)
-        movies_df.sort_values(by=['avg_vote'], inplace=True, ascending=False)
-        self.rating = pd.read_csv('../Resources/IMDb_ratings.csv', low_memory=False)
-        self.sub_movies = movies_df[movies_df['language'].str.contains('English', case=False)]
+        movies_df = pd.read_csv('../Resources/modified_movies.csv',low_memory=False)
+        movies_df.sort_values(by=['total_votes'], inplace=True, ascending=False)
+        
+        self.sub_movies = movies_df[movies_df['language'].str.contains('English', case=False)] 
         self.sub_movies.reset_index(drop=True, inplace=True)
+
         self.init_TFIDF()
+
 
     def init_TFIDF(self):
         tfidf = TfidfVectorizer(stop_words='english')
@@ -50,7 +53,8 @@ class MoviesManager:
         sorted_list1 = [element for _, element in sorted_zipped_lists]
 
         return sorted_list1
-    def recommendation(self, title):
+
+    def find_similar_based_on_plot(self, title):
 
         if title in self.indices.keys():
             idx=self.indices[title]
@@ -70,65 +74,68 @@ class MoviesManager:
     def getMovieName(self, title):
 
         if title in self.indices.keys():
-            return True, self.sub_movies[self.sub_movies['original_title'] == title]
+            return True, self.sub_movies[self.sub_movies['original_title'] == title].iloc[[0]]
         elif self.fuzzy_search(title)[0] in self.indices.keys():
-            #print("did you mean" ,self.fuzzy_search(title)[0], "?")
-            return False, self.sub_movies[self.sub_movies['original_title'] == self.fuzzy_search(title)[0]]
+            print("did you mean" ,self.fuzzy_search(title)[0], "?")
+            return False, self.sub_movies[self.sub_movies['original_title'] == self.fuzzy_search(title)[0]].iloc[[0]]
+
     
     def similarityFactor(self, movie1:pd.DataFrame, movie2 : pd.DataFrame, script_similarity):
         similarity = 0
 
-        value1 = np.array(movie1['director_encoded'].strip("[").strip("]").split(), dtype=int)
-        value2 = np.array(movie2['director_encoded'].strip("[").strip("]").split(), dtype=int)
+        value1 = np.array(movie1['director_encoded'].values[0].strip("[").strip("]").split(), dtype=int)
+        value2 = np.array(movie2['director_encoded'].values[0].strip("[").strip("]").split(), dtype=int)
         padding = abs(value1.shape[0] - value2.shape[0])
-        value1 = np.pad(value1, (padding, 0), 'constant') if value1.shape[0] < value2.shape[0] else value1
-        value2 = np.pad(value2, (padding, 0), 'constant') if value1.shape[0] > value2.shape[0] else value2
+        value1 = np.pad(value1, ( padding ,0), 'constant') if value1.shape[0] < value2.shape[0] else value1
+        value2 = np.pad(value2, ( padding ,0), 'constant') if value1.shape[0] > value2.shape[0] else value2
+        
         similarity_factor = 0.1 *difflib.SequenceMatcher(a= value1, b=value2).ratio()
+        
 
-        value1 = np.array(movie1['writer_encoded'].strip("[").strip("]").split(), dtype=int)
-        value2 = np.array(movie2['writer_encoded'].strip("[").strip("]").split(), dtype=int)
+        value1 = np.array(movie1['writer_encoded'].values[0].strip("[").strip("]").split(), dtype=int)
+        value2 = np.array(movie2['writer_encoded'].values[0].strip("[").strip("]").split(), dtype=int)
         padding = abs(value1.shape[0] - value2.shape[0])
-        value1 = np.pad(value1, (padding, 0), 'constant') if value1.shape[0] < value2.shape[0] else value1
-        value2 = np.pad(value2, (padding, 0), 'constant') if value1.shape[0] > value2.shape[0] else value2
+        value1 = np.pad(value1, ( padding ,0), 'constant') if value1.shape[0] < value2.shape[0] else value1
+        value2 = np.pad(value2, ( padding ,0), 'constant') if value1.shape[0] > value2.shape[0] else value2
+        
         similarity_factor += 0.1 * difflib.SequenceMatcher(a= value1, b=value2).ratio()
 
-        value1 = np.array(movie1['encoded_genre'].strip("[").strip("]").split(), dtype=int)
-        value2 = np.array(movie2['encoded_genre'].strip("[").strip("]").split(), dtype=int)
+        value1 = np.array(movie1['encoded_genre'].values[0].strip("[").strip("]").split(), dtype=int)
+        value2 = np.array(movie2['encoded_genre'].values[0].strip("[").strip("]").split(), dtype=int)
         padding = abs(value1.shape[0] - value2.shape[0])
-        value1 = np.pad(value1, (padding, 0), 'constant') if value1.shape[0] < value2.shape[0] else value1
-        value2 = np.pad(value2, (padding, 0), 'constant') if value1.shape[0] > value2.shape[0] else value2
-        similarity_factor += 0.3 * difflib.SequenceMatcher(a= value1, b=value2).ratio()
-
-        similarity_factor += 0.1 * ((movie2['avg_vote'] - 6.5)/3.5)
+        value1 = np.pad(value1, ( padding ,0), 'constant') if value1.shape[0] < value2.shape[0] else value1
+        value2 = np.pad(value2, ( padding ,0), 'constant') if value1.shape[0] > value2.shape[0] else value2
         
-        #print( "movies: " ,movie1['original_title'].item(), " : ", movie2['original_title'])
-        similarity_factor += 0.4 * script_similarity
+        similarity_factor += 0.3 * difflib.SequenceMatcher(a= value1, b=value2).ratio()
+        
+        similarity_factor += 0.3 * ( (movie2['avg_vote'].values[0])/10 )
+        
+        similarity_factor += 0.2 * script_similarity
+
         return similarity_factor 
     
     def recommend(self, movie):
         recommend_score = 0
         aux = 0
-        movies_list = self.recommendation(movie['original_title'])
+        movies_list = self.find_similar_based_on_plot(movie['original_title'].item())
         movies_list = movies_list[1:math.floor(len(movies_list)*0.1)]
         for m in movies_list: 
             found, name = self.getMovieName(m[2])
-            for index,  n in name.iterrows():
-                aux = self.similarityFactor(movie,n, m[1] )
-                if aux > recommend_score and n["original_title"] != movie["original_title"]:
-                    recommend_score = aux
-                    movie_to_recommend = name
-
+            aux = self.similarityFactor(movie,name, m[1] )
+            if aux > recommend_score : 
+                recommend_score = aux
+                movie_to_recommend = name
         return recommend_score, movie_to_recommend
 
 
 if __name__ == '__main__':
     MoviesManager = MoviesManager()
+    
+    movie=input(blue('Please enter the movie name:'))
+    while(movie!="exit"):
+        found, entry = MoviesManager.getMovieName(movie)
+        score, result = MoviesManager.recommend(entry)
+        print(green("similarity factor: "), yellow(score))
+        print( green("movie name: "), red(result['original_title'].item() ))
+        movie=input(blue('Please enter the movie name (enter "exit" to leave):')) 
 
-    movie = input('Please enter the movie name:')
-    found, entry = MoviesManager.getMovieName(movie)
-
-    for index,  e in entry.iterrows():
-        score, result = MoviesManager.recommend(e)
-        print("similarity factor: ", score)
-        #print(result)
-        print("movie name: ", result['original_title'].item())
