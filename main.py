@@ -1,9 +1,7 @@
 import time
 
-from NLP.SentimentAnalyzer import SentimentAnalyzer
-from PersonalityTest.QuestionsManager import QuestionsManager
 from Telegram.BotManager import BotManager
-from DatabseMangement.DataManagers.MoviesManger import MoviesManager
+from DataManagement.MoviesRecommender import MoviesManager
 
 def main():
     bot = BotManager()

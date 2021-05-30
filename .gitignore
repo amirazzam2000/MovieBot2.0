@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 Resources/MovieSummaries.tar/*
 
+test/models/*.tar.gz
+.vscode
+
