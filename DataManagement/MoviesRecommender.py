@@ -147,7 +147,7 @@ class MoviesManager:
         value1 = np.pad(value1, ( padding ,0), 'constant') if value1.shape[0] < value2.shape[0] else value1
         value2 = np.pad(value2, ( padding ,0), 'constant') if value1.shape[0] > value2.shape[0] else value2
         
-        similarity_factor = 0.1 *difflib.SequenceMatcher(a= value1, b=value2).ratio()
+        similarity_factor = 0.05 *difflib.SequenceMatcher(a= value1, b=value2).ratio()
         
 
         value1 = np.array(movie1['writer_encoded'].values[0].strip("[").strip("]").split(), dtype=int)
@@ -156,15 +156,19 @@ class MoviesManager:
         value1 = np.pad(value1, ( padding ,0), 'constant') if value1.shape[0] < value2.shape[0] else value1
         value2 = np.pad(value2, ( padding ,0), 'constant') if value1.shape[0] > value2.shape[0] else value2
         
-        similarity_factor += 0.1 * difflib.SequenceMatcher(a= value1, b=value2).ratio()
+        similarity_factor += 0.05 * difflib.SequenceMatcher(a= value1, b=value2).ratio()
 
+        if (abs(int(movie1['year'].values[0]) - int(movie2['year'].values[0])) != 0 ):
+            similarity_factor += 0.05 * (1 /(abs(int(movie1['year'].values[0]) - int(movie2['year'].values[0]))))
+        else: 
+            similarity_factor += 0.05
         value1 = np.array(movie1['encoded_genre'].values[0].strip("[").strip("]").split(), dtype=int)
         value2 = np.array(movie2['encoded_genre'].values[0].strip("[").strip("]").split(), dtype=int)
         padding = abs(value1.shape[0] - value2.shape[0])
         value1 = np.pad(value1, ( padding ,0), 'constant') if value1.shape[0] < value2.shape[0] else value1
         value2 = np.pad(value2, ( padding ,0), 'constant') if value1.shape[0] > value2.shape[0] else value2
         
-        similarity_factor += 0.3 * difflib.SequenceMatcher(a= value1, b=value2).ratio()
+        similarity_factor += 0.35 * difflib.SequenceMatcher(a= value1, b=value2).ratio()
         
         r = self.getMoveRating(movie2, age, gender)
         similarity_factor += 0.3 * (r/10)
@@ -224,7 +228,7 @@ class MoviesManager:
                     user_m = user_hate_movie_list.iloc[[index]]
                     s, r = self.similarityFactor(user_m ,name, m[1], age, gender )
                     aux_hate += s
-            aux = aux - 0.4 * aux_hate
+            aux = aux - aux_hate
             aux /= len(user_movie_list)
             if aux > recommend_score : 
                 recommend_score = aux

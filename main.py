@@ -58,3 +58,46 @@ if __name__ == '__main__':
     # sentimentAnalysis = SentimentAnalyzer()
     # questionManger = QuestionsManager()
     recommend()
+'''
+coraline: 
+
+like:
+Avatar
+Hacksaw Ridge
+Hidden Figures
+The Martian
+Harry Potter and the Goblet of Fire
+The Untouchables
+Arrival
+X-Men: Days of Future Past
+In the Family
+Lucy
+12 Years a Slave
+Slumdog Millionaire
+The Imitation Game
+The Lord of the Rings: The Return of the King
+The Lord of the Rings: The Two Towers
+The Lord of the Rings: The Fellowship of the Ring
+
+pentagon papers
+bridge of spies
+Sully
+Da Vinci Code
+The polar Express
+Rise of the Guardians
+Now you see me
+Invictus
+The Intern
+The Devil Wears Prada
+Mamma Mia!
+
+dislike:
+Harry Potter and the Deathly Hallows: Part 1
+Allegiant
+Justice League
+Dark Phoenix
+Aquaman
+Schindler's List
+Letters from Iwo Jima
+not care:
+'''
