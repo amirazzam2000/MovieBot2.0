@@ -11,10 +11,6 @@ import array
 from pandas import DataFrame
 from  UserManagement.User import User
 
-MALE = 1
-FEMALE = 2
-NONBINARY = 0
-
 class MoviesManager:
     def __init__(self):
         movies_df = pd.read_csv('Resources/modified_movies.csv',low_memory=False)
@@ -195,7 +191,7 @@ class MoviesManager:
         return recommend_score, movie_to_recommend
 
 
-    def recommend_from_user_list(self, user_movie_list: DataFrame, user_hate_movie_list:DataFrame, user_not_care_movie_list:DataFrame, age = 0, gender = NONBINARY):
+    def recommend_from_user_list(self, user_movie_list: DataFrame, user_hate_movie_list:DataFrame, user_not_care_movie_list:DataFrame, age = 0, gender = User.NONBINARY):
         recommend_score = 0
         aux = 0
         the_list = []
