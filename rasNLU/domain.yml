@@ -1,34 +1,72 @@
-version: "2.0"
-
-intents:
-  - greet
-  - goodbye
-  - affirm
-  - deny
-  - mood_great
-  - mood_unhappy
-  - bot_challenge
-
-responses:
-  utter_greet:
-  - text: "Hey! How are you?"
-
-  utter_cheer_up:
-  - text: "Here is something to cheer you up:"
-    image: "https://i.imgur.com/nGF1K8f.jpg"
-
-  utter_did_that_help:
-  - text: "Did that help you?"
-
-  utter_happy:
-  - text: "Great, carry on!"
-
-  utter_goodbye:
-  - text: "Bye"
-
-  utter_iamabot:
-  - text: "I am a bot, powered by Rasa."
-
+version: '2.0'
 session_config:
   session_expiration_time: 60
   carry_over_slots_to_new_session: true
+intents:
+- goodbye
+- affirm
+- nlu_fallback
+- greet
+- deny
+- request_names
+- mood_great
+- mood_unhappy
+- bot_challenge
+- give_bot_favourite_movie
+- repeat_name
+- recommend_movie
+- get_user_name
+entities:
+
+slots:
+  name_user:
+    type: text
+    influence_conversation: false
+  age_user:
+    type: text
+    influence_conversation: false
+  gender_user:
+    type: text
+    influence_conversation: false
+  new_user:
+    type: bool
+    influence_conversation: true
+responses:
+  utter_cheer_up:
+  - text: 'Here is something to cheer you up:'
+    image: https://i.imgur.com/nGF1K8f.jpg
+  utter_did_that_help:
+  - text: Did that help you?
+  utter_happy:
+  - text: Great, carry on!
+  utter_goodbye:
+  - text: Bye
+  utter_iamabot:
+  - text: I am a bot, powered by Rasa.
+  utter_ask_name_user:
+  - text: What is your name?
+  utter_ask_age_user:
+  - text: How old are you?
+  utter_ask_gender_user:
+  - text: What is your gender?
+  utter_submit:
+  - text: Ok. Thanks {name}!
+
+actions:
+- action_bot_favourite_movie
+- action_greet
+- action_receive_name
+- action_say_name
+- utter_greet
+- utter_slots_values
+- utter_submit
+- validate_name_form
+forms:
+  user_form:
+    required_slots:
+      name_user:
+      - type: from_text
+      age_user:
+      - type: from_text
+      gender_user:
+      - type: from_text
