@@ -2,81 +2,27 @@ version: "2.0"
 
 stories:
 
-- story: happy path
+
+
+- story: greet new user
   steps:
   - intent: greet
-  - action: utter_greet
-  - intent: mood_great
-  - action: utter_happy
+  - action: action_greet
+  - slot_was_set:
+    - new_user: true
+  - action: user_form
+  - active_loop: user_form
+  - active_loop: null
 
-- story: sad path 1
-  steps:
-  - intent: greet
-  - action: utter_greet
-  - intent: mood_unhappy
-  - action: utter_cheer_up
-  - action: utter_did_that_help
-  - intent: affirm
-  - action: utter_happy
 
-- story: sad path 2
-  steps:
-  - intent: greet
-  - action: utter_greet
-  - intent: mood_unhappy
-  - action: utter_cheer_up
-  - action: utter_did_that_help
-  - intent: deny
-  - action: utter_goodbye
 
-- story: interactive_story_1
+- story: bot favourite movie path
   steps:
-  - intent: movie_definition
-  - intent: movie_definition
-    entities:
-    - movies_definition: bay watch
-  - intent: movie_definition
-    entities:
-    - movie_name: yesterday
-  - intent: movie_definition
-    entities:
-    - movie_name: the house
-  - intent: movie_definition
-  - intent: movie_definition
-    entities:
-    - movie_name: the stars
+    - intent: give_bot_favourite_movie
+    - action: action_bot_favourite_movie
 
-- story: interactive_story_1
+- story: name path
   steps:
-  - intent: movie_definition
-    entities:
-    - movie_definition: bay watch
-  - intent: movie_definition
-    entities:
-    - movie_definition: bay watch
-  - intent: affirm
-  - action: utter_happy
-  - intent: movie_definition
-    entities:
-    - movie_name: last dance
-  - intent: movie_definition
-    entities:
-    - movie_name: the circus
-  - intent: movie_definition
-    entities:
-    - movie_name: pitch perfect
-  - intent: movie_definition
-    entities:
-    - movie_name: maybe I will
+  - intent: repeat_name
+  - action: action_say_name
 
-- story: interactive_story_1
-  steps:
-  - intent: movie_definition
-    entities:
-    - movie_definition: bay watch
-  - intent: movie_definition
-    entities:
-    - movie_name: high school musical
-  - intent: movie_definition
-    entities:
-    - movie_name: footlose

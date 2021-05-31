@@ -28,6 +28,7 @@ nlu:
     - see you around
     - bye bye
     - see you later
+    - 30
 - intent: affirm
   examples: |
     - yes
@@ -36,6 +37,7 @@ nlu:
     - of course
     - that sounds good
     - correct
+    - Ed
 - intent: deny
   examples: |
     - no
@@ -45,6 +47,8 @@ nlu:
     - don't like that
     - no way
     - not really
+    - vincent
+    - vincent-mcvincent
 - intent: mood_great
   examples: |
     - perfect
@@ -83,94 +87,26 @@ nlu:
     - are you a human?
     - am I talking to a bot?
     - am I talking to a human?
-- intent: user_definition
+- intent: give_bot_favourite_movie
   examples: |
-    - I am [name](user_name)
-    - I am [groot](user_name)
-    - I am [ameer](user_name)
-    - I am [sonia](user_name)
-    - I am [s](user_name)
-    - I am [a](user_name)
-    - I am [b](user_name)
-    - I am [c](user_name)
-    - I am [d](user_name)
-    - I am [e](user_name)
-    - I am [f](user_name)
-    - I am [t](user_name)
-    - I am [r](user_name)
-    - I am [m](user_name)
-    - my name is [groot](user_name)
-    - my name is [ameer](user_name)
-    - my name is [sonia](user_name)
-    - my name is [s](user_name)
-    - my name is [a](user_name)
-    - my name is [b](user_name)
-    - my name is [c](user_name)
-    - my name is [d](user_name)
-    - my name is [e](user_name)
-    - my name is [f](user_name)
-    - my name is [et](user_name)
-    - my name is [r](user_name)
-    - my name is [m](user_name)
-- intent: movie_definition
+    - what is your favourite movie?
+    - tell me your favourite movie?
+    - what's your favourite movie?
+    - what movie do you like?
+- intent: repeat_name
   examples: |
-    - I like [movie name](movie_name)
-    - I like [the avengers](movie_name)
-    - I like [star wars: last hope](movie_name)
-    - I like [spiderman into the spiderverse](movie_name)
-    - I like [twilight](movie_name)
-    - I like [yesterday](movie_name)
-    - I like [rocket men](movie_name)
-    - I like [finding nemo](movie_name)
-    - I like [the secret life of pets](movie_name)
-    - I like [moonlight](movie_name)
-    - I like [forrest gump](movie_name)
-    - I like [ocean's 11](movie_name)
-    - I like [djgoq werjqlj da](movie_name)
-    - I like [hkdjfa s lkd](movie_name)
-    - I like [lkjl](movie_name)
-    - I like [kljfdak aa](movie_name)
-    - I like to watch [movie name](movie_name)
-    - I like to watch [the avengers](movie_name)
-    - I like to watch [star wars: last hope](movie_name)
-    - I like to watch [spiderman into the spiderverse](movie_name)
-    - I like to watch [twilight](movie_name)
-    - I like to watch [yesterday](movie_name)
-    - I like to watch [rocket men](movie_name)
-    - I like to watch [finding nemo](movie_name)
-    - I like to watch [the secret life of pets](movie_name)
-    - I like to watch [moonlight](movie_name)
-    - I like to watch [forrest gump](movie_name)
-    - I like to watch [ocean's 11](movie_name)
-    - I like to watch [djkd daskjldsfjk](movie_name)
-    - I like to watch [mkkdk](movie_name)
-    - I like to watch [kdaj d adkjs aaka](movie_name)
-    - I like to watch [aalei](movie_name)
-    - I enjoy watching [movie name](movie_name)
-    - I enjoy watching [the avengers](movie_name)
-    - I enjoy watching [star wars: last hope](movie_name)
-    - I enjoy watching [spiderman into the spiderverse](movie_name)
-    - I enjoy watching [twilight](movie_name)
-    - I enjoy watching [yesterday](movie_name)
-    - I enjoy watching [rocket men](movie_name)
-    - I enjoy watching [finding nemo](movie_name)
-    - I enjoy watching [the secret life of pets](movie_name)
-    - I enjoy watching [moonlight](movie_name)
-    - I enjoy watching [forrest gump](movie_name)
-    - I enjoy watching [ocean's 11](movie_name)
-    - I enjoy watching [jhkad dkjd dajlkd](movie_name)
-    - I enjoy watching [df dd](movie_name)
-    - I enjoy watching [dkla a klakjl](movie_name)
-    - I enjoy watching [klj a](movie_name)
-    - I like watching [yesterday](movie_name)
-    - I like watching [the house](movie_name)
-    - I like watching [the stars](movie_name)
-    - I like to watch [bay watch](movie_definition)
-    - I like watching [bay watch](movie_definition)
-    - I like watching [last dance](movie_name)
-    - I like watching [the circus](movie_name)
-    - I like watching [pitch perfect](movie_name)
-    - I like watching [maybe I will](movie_name)
-    - I like [bay watch](movie_definition)
-    - I like [high school musical](movie_name)
-    - I like watching [footlose](movie_name)
+    - what is my name?
+    - what's my name?
+    - do you know my name?
+- intent: recommend_movie
+  examples: |
+    - Recommend me a movie
+    - What movie should I watch?
+    - I want to watch a movie
+    - What movie should I watch?
+- intent: recommend_movie
+  examples: |
+    - Recommend me a movie
+    - What movie should I watch?
+    - I want to watch a movie
+    - What movie should I watch?
