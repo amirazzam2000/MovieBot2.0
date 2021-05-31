@@ -34,7 +34,7 @@ class Greet(Action):
             dispatcher.utter_message(text=f"Hello stranger")
             return [SlotSet("new_user", "true")]
         else:
-            dispatcher.utter_message(text=f"Hello {name_user}, tell me what I can do for you.")
+            dispatcher.utter_message(text=f"Hello {name_user}! Tell me, what can I do for you?")
             return [SlotSet("new_user", "false")]
 
 
@@ -57,7 +57,7 @@ class ActionSayName(Action):
 
 class ValidateNameForm(FormValidationAction):
     def name(self) -> Text:
-        return "validate_name_form"
+        return "validate_user_form"
 
     def validate_name_user(
             self,
@@ -66,21 +66,23 @@ class ValidateNameForm(FormValidationAction):
             tracker: Tracker,
             domain: DomainDict,
     ) -> Dict[Text, Any]:
-        """Validate `first_name` value."""
 
+        dispatcher.utter_message(text=f"Getting your name")
         # If the name is super short, it might be wrong.
         print(f"First name given = {slot_value} length = {len(slot_value)}")
         if len(slot_value) <= 1:
             dispatcher.utter_message(text=f"That's a very short name. I'm assuming you mis-spelled.")
-            return {"name_user": None}
+
         else:
             entities = tracker.latest_message['entities']
-            for e in entities:
-                if e["entity"].equals("PERSON"):
-                    if "value" in e:
-                        return {"PERSON": e["value"]}
             print(entities)
-            dispatcher.utter_message(text=f"I didn't catch your name. What's your name?")
+            for e in entities:
+                if str(e["entity"]) == "PERSON":
+                    if "value" in e:
+                        dispatcher.utter_message(text=str(e["value"]))
+                        return {"name_user": e["value"]}
+
+            dispatcher.utter_message(text=f"I didn't catch your name. Make sure it's capitalized")
             return {"name_user": None}
 
     def validate_gender_user(
@@ -90,7 +92,6 @@ class ValidateNameForm(FormValidationAction):
             tracker: Tracker,
             domain: DomainDict,
     ) -> Dict[Text, Any]:
-        """Validate `last_name` value."""
 
         # If the name is super short, it might be wrong.
         print(f"Last name given = {slot_value} length = {len(slot_value)}")
@@ -107,7 +108,6 @@ class ValidateNameForm(FormValidationAction):
             tracker: Tracker,
             domain: DomainDict,
     ) -> Dict[Text, Any]:
-        """Validate `last_name` value."""
 
         # If the name is super short, it might be wrong.
         print(f"Last name given = {slot_value} length = {len(slot_value)}")
@@ -117,9 +117,9 @@ class ValidateNameForm(FormValidationAction):
         else:
             entities = tracker.latest_message['entities']
             for e in entities:
-                if e["entity"].equals("PERSON"):
+                if e["entity"] == "CARDINAL":
                     if "value" in e:
-                        return {"PERSON": e["value"]}
+                        return {"age_user": str(e["value"])}
             print(entities)
-            dispatcher.utter_message(text=f"I didn't catch your name. What's your name?")
+            dispatcher.utter_message(text=f"I didn't catch your age. Could you say it again?")
             return {"age_user": None}

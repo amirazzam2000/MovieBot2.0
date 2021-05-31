@@ -17,7 +17,8 @@ intents:
 - recommend_movie
 - get_user_name
 entities:
-
+  - PERSON
+  - CARDINAL
 slots:
   name_user:
     type: text
@@ -31,6 +32,17 @@ slots:
   new_user:
     type: bool
     influence_conversation: true
+
+forms:
+  user_form:
+    required_slots:
+      name_user:
+      - type: from_text
+      age_user:
+      - type: from_text
+      gender_user:
+      - type: from_text
+
 responses:
   utter_cheer_up:
   - text: 'Here is something to cheer you up:'
@@ -60,13 +72,5 @@ actions:
 - utter_greet
 - utter_slots_values
 - utter_submit
-- validate_name_form
-forms:
-  user_form:
-    required_slots:
-      name_user:
-      - type: from_text
-      age_user:
-      - type: from_text
-      gender_user:
-      - type: from_text
+- validate_user_form
+

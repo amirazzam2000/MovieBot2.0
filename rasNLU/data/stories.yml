@@ -2,9 +2,6 @@ version: "2.0"
 
 stories:
 
--story: recommend movie
-  steps:
-  - intent: recommend_movie
 
 
 - story: greet new user
@@ -17,12 +14,7 @@ stories:
   - active_loop: user_form
   - active_loop: null
 
-- story: greet returning user
-  steps:
-  - intent: greet
-  - action: action_greet
-  - slot_was_set:
-    - new_user: false
+
 
 - story: bot favourite movie path
   steps:
@@ -34,31 +26,3 @@ stories:
   - intent: repeat_name
   - action: action_say_name
 
-
-- story: interactive_story_1
-  steps:
-  - intent: greet
-  - action: action_greet
-  - slot_was_set:
-    - new_user: 'true'
-  - action: user_form
-  - active_loop: user_form
-  - slot_was_set:
-    - requested_slot: name_user
-  - slot_was_set:
-    - name_user: Ed
-  - slot_was_set:
-    - requested_slot: age_user
-  - slot_was_set:
-    - age_user: '30'
-  - slot_was_set:
-    - requested_slot: gender_user
-  - slot_was_set:
-    - gender_user: male
-  - slot_was_set:
-    - requested_slot: null
-  - active_loop: null
-  - intent: greet
-  - action: action_greet
-  - slot_was_set:
-    - new_user: 'false'
