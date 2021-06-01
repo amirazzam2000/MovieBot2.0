@@ -36,10 +36,39 @@ def recommend():
     found, entry = manager.getMovieName(movie)
     user.addMovie(entry, user.LIKE)
 
+    movie=input(blue('Please enter the name of a movie that you like:'))
+    found, entry2 = manager.getMovieName(movie)
+    user.addMovie(entry2, user.LIKE)
+
+    movie=input(blue('Please enter the name of a movie that you like:'))
+    found, entry3 = manager.getMovieName(movie)
+    user.addMovie(entry3, user.LIKE)
+
+    score, result = manager.recommend(entry, user.getLikeList(),user.getDislikeList(),user.getNotCareList(), age=age, gender=gender)
+    print(green("similarity factor: "), yellow(score))
+    print( green("movie name : "), red(result['original_title'].item()))
+    like=int(input(blue('do you like this movie (1. yes / 2. no / 3. don\'t care about it):')))
+    user.addMovie(result, like)
+
+    score, result = manager.recommend(entry2, user.getLikeList(),user.getDislikeList(),user.getNotCareList(), age=age, gender=gender)
+    print(green("similarity factor: "), yellow(score))
+    print( green("movie name : "), red(result['original_title'].item()))
+    like=int(input(blue('do you like this movie (1. yes / 2. no / 3. don\'t care about it):')))
+    user.addMovie(result, like)
+
+    score, result = manager.recommend(entry3, user.getLikeList(),user.getDislikeList(),user.getNotCareList(), age=age, gender=gender)
+    print(green("similarity factor: "), yellow(score))
+    print( green("movie name : "), red(result['original_title'].item()))
+    like=int(input(blue('do you like this movie (1. yes / 2. no / 3. don\'t care about it):')))
+    user.addMovie(result, like)
+
+    print(blue('the test is now over you can write "recommend" to get a recommendation or add more movies you like/hate'))
+
     while(True):
-        movie=input(blue('Please enter the name of a movie (enter "exit" to leave / enter "recommend" to recommend a movie):'))
+        genre = input(blue('what genre of movies you feel like watching today:'))
+        movie = input(blue('Please enter the name of a movie (enter "exit" to leave / enter "recommend" to recommend a movie):'))
         if (movie == "recommend"):
-            score, result = manager.recommend_from_user_list(user.getLikeList(),user.getDislikeList(),user.getNotCareList(), age=age, gender=gender)
+            score, result = manager.recommend_from_user_list(user.getLikeList(),user.getDislikeList(),user.getNotCareList(), age=age, gender=gender, genre=genre)
             print(green("similarity factor: "), yellow(score))
             print( green("movie name: "), red(result['original_title'].item()))
 
