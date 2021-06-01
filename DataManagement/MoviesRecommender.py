@@ -95,15 +95,7 @@ class MoviesManager:
                 print("assuming ", t[0][0], "")
                 return True, self.sub_movies[self.sub_movies['original_title'] == t[0][0] ].iloc[[0]]
             else:
-                value = input("did you mean ", t[0][0], " ? (y/n)")
-                i = 0
-                while(value != "y" and i < len(t)):
-                    if(value == "n"):
-                        i += 1
-                        value = input("then did you mean ", t[i][0], " ? (y/n)")
-                    else:
-                        print("please enter y or n")
-
+                print("did you mean ", t[0][0], " ?")
                 return False, self.sub_movies[self.sub_movies['original_title'] == t[0][0] ].iloc[[0]]
 
 
@@ -160,8 +152,13 @@ class MoviesManager:
 
         return rating
     
-    def similarityFactor(self, movie1: DataFrame, movie2 : DataFrame, script_similarity, age=0, gender=0):
+    def similarityFactor(self, movie1: DataFrame, movie2 : DataFrame, script_similarity, age=0, gender=0, time_important=False):
         similarity = 0
+
+        if time_important:
+            year_importance = 0.05
+        else:
+            year_importance = 0.03
 
         value1 = np.array(movie1['director_encoded'].values[0].strip("[").strip("]").split(), dtype=int)
         value2 = np.array(movie2['director_encoded'].values[0].strip("[").strip("]").split(), dtype=int)
@@ -182,9 +179,9 @@ class MoviesManager:
 
         try:
             if (abs(int(movie1['year'].values[0]) - int(movie2['year'].values[0])) != 0 ):
-                similarity_factor += 0.03 * (1 /(abs(int(movie1['year'].values[0]) - int(movie2['year'].values[0]))))
+                similarity_factor += year_importance * (1 /(abs(int(movie1['year'].values[0]) - int(movie2['year'].values[0]))))
             else: 
-                similarity_factor += 0.03
+                similarity_factor += year_importance
         except ValueError: 
             similarity_factor += 0.01
         
@@ -194,10 +191,10 @@ class MoviesManager:
         value1 = np.pad(value1, ( padding ,0), 'constant') if value1.shape[0] < value2.shape[0] else value1
         value2 = np.pad(value2, ( padding ,0), 'constant') if value1.shape[0] > value2.shape[0] else value2
         
-        similarity_factor += 0.36 * difflib.SequenceMatcher(a= value1, b=value2).ratio()
+        similarity_factor += 0.35 * difflib.SequenceMatcher(a= value1, b=value2).ratio()
         
         r = self.getMoveRating(movie2, age, gender)
-        similarity_factor += 0.31 * (r/10)
+        similarity_factor += (0.3 + (0.05 - year_importance)) * (r/10)
 
         
         
@@ -230,7 +227,7 @@ class MoviesManager:
         return recommend_score, movie_to_recommend
 
 
-    def recommend_from_user_list(self, user_movie_list: DataFrame, user_hate_movie_list:DataFrame, user_not_care_movie_list:DataFrame, age = 0, gender = User.NONBINARY, genre=None):
+    def recommend_from_user_list(self, user_movie_list: DataFrame, user_hate_movie_list:DataFrame, user_not_care_movie_list:DataFrame, age = 0, gender = User.NONBINARY, genre=None, time_important=False):
         recommend_score = 0
         aux = 0
         the_list = []
@@ -263,12 +260,12 @@ class MoviesManager:
                 if user_movie_list is not None:
                     for index in range(len(user_movie_list)):
                         user_m = user_movie_list.iloc[[index]]
-                        s, r = self.similarityFactor(user_m ,name, m[1], age, gender )
+                        s, r = self.similarityFactor(user_m ,name, m[1], age, gender,  time_important)
                         aux += s
                 if user_hate_movie_list is not None:
                     for index in range(len(user_hate_movie_list)):
                         user_m = user_hate_movie_list.iloc[[index]]
-                        s, r = self.similarityFactor(user_m ,name, m[1], age, gender )
+                        s, r = self.similarityFactor(user_m ,name, m[1], age, gender, time_important )
                         aux_hate += s
                 aux = aux - aux_hate
                 aux /= len(user_movie_list)
