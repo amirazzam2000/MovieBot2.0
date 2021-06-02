@@ -29,6 +29,8 @@ class SentimentAnalyzer(Component):
 
     def __init__(self, component_config=None):
         super(SentimentAnalyzer, self).__init__(component_config)
+        self.classifier = None
+        self.train()
 
     def remove_noise(self, tweet_tokens, stop_words=()):
 
@@ -62,7 +64,7 @@ class SentimentAnalyzer(Component):
         for tweet_tokens in cleaned_tokens_list:
             yield dict([token, True] for token in tweet_tokens)
 
-    def train(self, training_data, cfg, **kwargs):
+    def train(self, arg1=None, arg2=None, **kwargs):
         """Load the sentiment polarity labels from the text
            file, retrieve training tokens and after formatting
            data train the classifier."""
@@ -112,7 +114,7 @@ class SentimentAnalyzer(Component):
         train_data = dataset[:7000]
         test_data = dataset[7000:]
 
-        classifier = NaiveBayesClassifier.train(train_data)
+        self.classifier = NaiveBayesClassifier.train(train_data)
 
     def convert_to_rasa(self, value, confidence):
         """Convert model output into the Rasa NLU compatible output format."""
@@ -132,15 +134,21 @@ class SentimentAnalyzer(Component):
     def process(self, message, **kwargs):
         """Retrieve the tokens of the new message, pass it to the classifier
             and append prediction results to the message class."""
+        if self.classifier is None:
+            self.train()
+
         if message.get("text") is not None:
-            tokens = [t.text for t in message.get("tokens")]
-            tb = self.preprocessing(tokens)
+            #tokens = [t.text for t in message.get("tokens")]
+            #tb = self.preprocessing(tokens)
             # pred = self.clf.prob_classify(tb)
 
-            confidence = 0.9
-            custom_tokens = self.remove_noise(self.word_tokenize(message.get("text")))
 
-            sentiment = self.classify(dict([token, True] for token in custom_tokens))
+            custom_tokens = self.remove_noise(word_tokenize(message.get("text")))
+
+            t = self.classifier.prob_classify(dict([token, True] for token in custom_tokens))
+
+            sentiment = 'Positive' if t.prob('Positive') > t.prob('Negative') else 'Negative'
+            confidence = max(t.prob('Positive') , t.prob('Negative'))
 
             entity = self.convert_to_rasa(sentiment, confidence)
 

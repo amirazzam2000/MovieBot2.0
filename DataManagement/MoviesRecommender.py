@@ -3,7 +3,6 @@ import datetime as dt
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 from sklearn.metrics.pairwise import cosine_similarity
-from colors import blue, red, yellow, green
 import difflib
 import numpy as np 
 import math 

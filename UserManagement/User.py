@@ -1,6 +1,5 @@
 from pandas import DataFrame
 import pandas as pd
-from colors import blue, red, yellow, green
 
 class User:
     LIKE = 1
@@ -36,15 +35,15 @@ class User:
                 self.user_not_care_movie_list = self.user_not_care_movie_list.append([movie])
 
     def print(self):
-        print(green("like:"))
+        print(("like:"))
         if self.user_movie_list is not None:
             for i, m in self.user_movie_list.iterrows():
                 print(m.original_title)
-        print(green("dislike:"))
+        print(("dislike:"))
         if self.user_hate_movie_list is not None:
             for i, m in self.user_hate_movie_list.iterrows():
                 print(m.original_title)
-        print(green("not care:"))
+        print(("not care:"))
         if self.user_not_care_movie_list is not None:
             for i, m in self.user_not_care_movie_list.iterrows():
                 print(m.original_title)
