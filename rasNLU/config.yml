@@ -7,6 +7,8 @@ pipeline:
 # # If you'd like to customize it, uncomment and adjust the pipeline.
   # # See https://rasa.com/docs/rasa/tuning-your-model for more information.
    - name: SpacyNLP
+     model: "en_core_web_md"
+     case_sensitive: False
    #- name: WhitespaceTokenizer
    - name: SpacyTokenizer
    - name: RegexFeaturizer
@@ -29,7 +31,8 @@ pipeline:
    - name: FallbackClassifier
      threshold: 0.3
      ambiguity_threshold: 0.1
-
+   - name: SklearnIntentClassifier
+   # - name: SentimentAnalyzer.SentimentAnalyzer
 # Configuration for Rasa Core.
 # https://rasa.com/docs/rasa/core/policies/
 policies:
