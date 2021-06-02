@@ -7,6 +7,9 @@ from rasa_sdk.types import DomainDict
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import EventType
 
+from DataManagement.MoviesRecommender import MoviesManager
+
+
 class BotFavouriteMovie(Action):
 
     def name(self) -> Text:
@@ -86,15 +89,15 @@ class ValidateUserForm(FormValidationAction):
 
                 if "confidence" not in intents:
                     for i in intents:
-                        if str(i["name"]) == "affirm" and float(str(i["confidence"])) > 0.9:
+                        if str(i["name"]) == "affirm":
                             return {"permission_name_user": "true"}
-                        if str(i["name"]) == "deny" and int(str(i["confidence"])) > 0.9:
+                        if str(i["name"]) == "deny":
                             dispatcher.utter_message(text=f"In that case I'll call you user33")
                             return {"permission_name_user": "false", "name_user": "user33"}
                 else:
-                    if str(intents["name"]) == "affirm" and float(str(intents["confidence"])) > 0.9:
+                    if str(intents["name"]) == "affirm":
                         return {"permission_name_user": "true"}
-                    if str(intents["name"]) == "deny" and float(str(intents["confidence"])) > 0.9:
+                    if str(intents["name"]) == "deny":
                         dispatcher.utter_message(text=f"In that case I'll call you user33")
                         return {"permission_name_user": "false", "name_user": "user33"}
 
@@ -154,14 +157,14 @@ class ValidateUserForm(FormValidationAction):
 
                 if "confidence" not in intents:
                     for i in intents:
-                        if str(i["name"]) == "affirm" and float(str(i["confidence"])) > 0.9:
+                        if str(i["name"]) == "affirm":
                             return {"permission_gender_user": "true"}
-                        if str(i["name"]) == "deny" and int(str(i["confidence"])) > 0.9:
+                        if str(i["name"]) == "deny":
                             return {"permission_gender_user": "false", "gender_user": "nonbinary"}
                 else:
-                    if str(intents["name"]) == "affirm" and float(str(intents["confidence"])) > 0.9:
+                    if str(intents["name"]) == "affirm":
                         return {"permission_gender_user": "true"}
-                    if str(intents["name"]) == "deny" and float(str(intents["confidence"])) > 0.9:
+                    if str(intents["name"]) == "deny":
                         return {"permission_gender_user": "false", "gender_user": "nonbinary"}
             else:
                 return {"permission_gender_user": "true", "gender_user": gender}
@@ -208,14 +211,14 @@ class ValidateUserForm(FormValidationAction):
             intents = tracker.latest_message['intent']
             if "confidence" not in intents:
                 for i in intents:
-                    if str(i["name"]) == "affirm" and float(str(i["confidence"])) > 0.9:
+                    if str(i["name"]) == "affirm":
                         return {"permission_age_user": "true"}
-                    if str(i["name"]) == "deny" and int(str(i["confidence"])) > 0.9:
+                    if str(i["name"]) == "deny":
                         return {"permission_age_user": "false", "age_user": "0"}
             else:
-                if str(intents["name"]) == "affirm" and float(str(intents["confidence"])) > 0.9:
+                if str(intents["name"]) == "affirm":
                     return {"permission_age_user": "true"}
-                if str(intents["name"]) == "deny" and float(str(intents["confidence"])) > 0.9:
+                if str(intents["name"]) == "deny":
                     return {"permission_age_user": "false", "age_user": "0"}
         else:
             return {"permission_age_user": "true", "age_user": age}
@@ -249,14 +252,14 @@ class ValidateUserForm(FormValidationAction):
 
         if "confidence" not in intents:
             for i in intents:
-                if str(i["name"]) == "affirm" and float(str(i["confidence"])) > 0.9:
+                if str(i["name"]) == "affirm":
                     return {"permission_initial_test_user": "true"}
-                if str(i["name"]) == "deny" and int(str(i["confidence"])) > 0.9:
+                if str(i["name"]) == "deny":
                     return {"permission_initial_test_user": "false"}
         else:
-            if str(intents["name"]) == "affirm" and float(str(intents["confidence"])) > 0.9:
+            if str(intents["name"]) == "affirm":
                 return {"permission_initial_test_user": "true"}
-            if str(intents["name"]) == "deny" and float(str(intents["confidence"])) > 0.9:
+            if str(intents["name"]) == "deny":
                 return {"permission_initial_test_user": "false"}
 
         return {"permission_initial_test_user": "false"}
@@ -274,7 +277,8 @@ class ValidateInitialTestForm(FormValidationAction):
             domain: DomainDict,
     ) -> Dict[Text, Any]:
 
-
+        manager = MoviesManager()
+        found, entry = manager.getMovieName(str(slot_value))
         # If the name is super short, it might be wrong.
         if len(slot_value) <= 1:
             dispatcher.utter_message(text=f"That's a very short name. I'm assuming you mis-spelled.")

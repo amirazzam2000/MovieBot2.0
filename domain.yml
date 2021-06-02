@@ -48,13 +48,13 @@ slots:
   permission_initial_test_user:
     type: bool
     influence_conversation: true
-  movie_1:
+  movie_1_initial_test:
     type: text
     influence_conversation: false
-  movie_2:
+  movie_2_initial_test:
     type: text
     influence_conversation: false
-  movie_3:
+  movie_3_initial_test:
     type: text
     influence_conversation: false
 forms:
@@ -76,11 +76,11 @@ forms:
       - type: from_text
   initial_test_form:
     required_slots:
-      movie_1:
+      movie_1_initial_test:
         - type: from_text
-      movie_2:
+      movie_2_initial_test:
         - type: from_text
-      movie_3:
+      movie_3_initial_test:
         - type: from_text
 
 

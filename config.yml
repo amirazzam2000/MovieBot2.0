@@ -23,6 +23,8 @@ pipeline:
    - name: EntitySynonymMapper
    - name: SpacyEntityExtractor
    - name: CRFEntityExtractor
+   - name: SklearnIntentClassifier
+   - name: SentimentAnalyzer.SentimentAnalyzer
    - name: ResponseSelector
      epochs: 100
      constrain_similarities: true
