@@ -3,8 +3,7 @@ version: "2.0"
 stories:
 
 
-
-- story: greet new user
+- story: greet new user and do initial test
   steps:
   - intent: greet
   - action: action_greet
@@ -13,7 +12,32 @@ stories:
   - action: user_form
   - active_loop: user_form
   - active_loop: null
+  - slot_was_set:
+     - permission_initial_test_user: true
+  - action: utter_happy
+  - action: initial_test
+  - active_loop: initial_test
+  - active_loop: null
 
+- story: greet new user and do not do initial test
+  steps:
+  - intent: greet
+  - action: action_greet
+  - slot_was_set:
+    - new_user: true
+  - action: user_form
+  - active_loop: user_form
+  - active_loop: null
+  - slot_was_set:
+     - permission_initial_test_user: false
+  - action: utter_submit
+
+- story: greet existing user
+  steps:
+  - intent: greet
+  - action: action_greet
+  - slot_was_set:
+    - new_user: false
 
 
 - story: bot favourite movie path

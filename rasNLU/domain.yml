@@ -15,10 +15,14 @@ intents:
 - give_bot_favourite_movie
 - repeat_name
 - recommend_movie
-- get_user_name
+- get_gender
+- years_old
+
 entities:
   - PERSON
   - CARDINAL
+  - gender
+  - age
 slots:
   name_user:
     type: text
@@ -32,16 +36,53 @@ slots:
   new_user:
     type: bool
     influence_conversation: true
-
+  permission_name_user:
+    type: bool
+    influence_conversation: false
+  permission_age_user:
+    type: bool
+    influence_conversation: false
+  permission_gender_user:
+    type: bool
+    influence_conversation: false
+  permission_initial_test_user:
+    type: bool
+    influence_conversation: true
+  movie_1:
+    type: text
+    influence_conversation: false
+  movie_2:
+    type: text
+    influence_conversation: false
+  movie_3:
+    type: text
+    influence_conversation: false
 forms:
   user_form:
     required_slots:
+      permission_name_user:
+      - type: from_text
       name_user:
+      - type: from_text
+      permission_age_user:
       - type: from_text
       age_user:
       - type: from_text
+      permission_gender_user:
+      - type: from_text
       gender_user:
       - type: from_text
+      permission_initial_test_user:
+      - type: from_text
+  initial_test_form:
+    required_slots:
+      movie_1:
+        - type: from_text
+      movie_2:
+        - type: from_text
+      movie_3:
+        - type: from_text
+
 
 responses:
   utter_cheer_up:
@@ -55,15 +96,35 @@ responses:
   - text: Bye
   utter_iamabot:
   - text: I am a bot, powered by Rasa.
+  utter_ask_permission_name_user:
+  - text: May I ask your name?
   utter_ask_name_user:
-  - text: What is your name?
+  - text: What's your name?
+  utter_ask_permission_age_user:
+  - text: If you could tell me your age I could provide more accurate results. Is that okay for you?
   utter_ask_age_user:
   - text: How old are you?
+  utter_ask_permission_gender_user:
+  - text: Do you want me to take your gender into account to recommend movies?
   utter_ask_gender_user:
-  - text: What is your gender?
+  - text: What is your gender? I'm non-binary.
+  utter_ask_permission_initial_test_user:
+  - text: >
+          To customize the recommendations I need to know more about your movie taste.
+          Can I ask you a few questions? It will take a couple minutes.
   utter_submit:
-  - text: Ok. Thanks {name}!
-
+  - text: Ok. Thanks {name_user}!
+  utter_ask_movie_1_initial_test:
+  - text: >
+      Great!
+      This test is very simple. Just give me the name of 3 movies you like.
+      If they are from different gender the more customized the recommendations will be.
+      Let's get started with the first one.
+      Tell me the name of a movie you like.
+  utter_ask_movie_2_initial_test:
+    - text: Tell me another movie you like.
+  utter_ask_movie_3_initial_test:
+    - text: We're almost done... one more movie please.
 actions:
 - action_bot_favourite_movie
 - action_greet
@@ -73,4 +134,4 @@ actions:
 - utter_slots_values
 - utter_submit
 - validate_user_form
-
+- validate_initial_test_form

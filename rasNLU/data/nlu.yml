@@ -28,16 +28,15 @@ nlu:
     - see you around
     - bye bye
     - see you later
-    - 30
 - intent: affirm
   examples: |
     - yes
+    - yeah
     - y
     - indeed
     - of course
     - that sounds good
     - correct
-    - Ed
 - intent: deny
   examples: |
     - no
@@ -47,8 +46,6 @@ nlu:
     - don't like that
     - no way
     - not really
-    - vincent
-    - vincent-mcvincent
 - intent: mood_great
   examples: |
     - perfect
@@ -104,9 +101,34 @@ nlu:
     - What movie should I watch?
     - I want to watch a movie
     - What movie should I watch?
-- intent: recommend_movie
+- intent: years_old
   examples: |
-    - Recommend me a movie
-    - What movie should I watch?
-    - I want to watch a movie
-    - What movie should I watch?
+    - I'm [30](age) years old
+    - [30](age) years old
+    - I'm [9](age) years old
+    - [9](age) years old
+    - I'm [64](age) years old
+    - [64](age) years old
+    - I'm [17](age) years old
+    - [17](age) years old
+    - I'm [24](age) years old
+    - [24](age) years old
+    - I'm [55](age) years old
+    - [55](age) years old
+- intent: get_gender
+  examples: |
+    - [female](gender)
+    - [male](gender)
+    - [non-binary](gender)
+    - I'm a [female](gender)
+    - I'm a [male](gender)
+    - I'm a [non-binary](gender)
+    - I identify as [female](gender)
+    - I identify as [male](gender)
+    - I identify as [non-binary](gender)
+- lookup: gender
+  examples: |
+    - female
+    - male
+    - nonbinary
+    - non-binary
