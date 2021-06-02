@@ -15,8 +15,8 @@ stories:
   - slot_was_set:
      - permission_initial_test_user: true
   - action: utter_happy
-  - action: initial_test
-  - active_loop: initial_test
+  - action: initial_test_form
+  - active_loop: initial_test_form
   - active_loop: null
 
 - story: greet new user and do not do initial test

@@ -102,6 +102,8 @@ class ValidateUserForm(FormValidationAction):
                 dispatcher.utter_message(text=f"It's very nice to meet you {name}!")
                 return {"permission_name_user": "true", "name_user": name}
 
+        return {"permission_name_user": "false"}
+
     def validate_name_user(
             self,
             slot_value: Any,
@@ -164,6 +166,8 @@ class ValidateUserForm(FormValidationAction):
             else:
                 return {"permission_gender_user": "true", "gender_user": gender}
 
+            return {"permission_gender_user": "false"}
+
     def validate_gender_user(
             self,
             slot_value: Any,
@@ -216,6 +220,8 @@ class ValidateUserForm(FormValidationAction):
         else:
             return {"permission_age_user": "true", "age_user": age}
 
+        return {"permission_age_user": "false"}
+
     def validate_age_user(
             self,
             slot_value: Any,
@@ -252,6 +258,8 @@ class ValidateUserForm(FormValidationAction):
                 return {"permission_initial_test_user": "true"}
             if str(intents["name"]) == "deny" and float(str(intents["confidence"])) > 0.9:
                 return {"permission_initial_test_user": "false"}
+
+        return {"permission_initial_test_user": "false"}
 
 class ValidateInitialTestForm(FormValidationAction):
     def name(self) -> Text:
