@@ -10,10 +10,7 @@ import math
 import array
 from pandas import DataFrame
 from  UserManagement.User import User
-
-MALE = 1
-FEMALE = 2
-NONBINARY = 0
+from fuzzywuzzy import process
 
 class MoviesManager:
     def __init__(self):
@@ -22,7 +19,7 @@ class MoviesManager:
         
         self.sub_movies = movies_df[movies_df['language'].str.contains('English', case=False)] 
         self.sub_movies.reset_index(drop=True, inplace=True)
-
+        self.genres_loaded = np.load("Resources/genre.npy")
         self.init_TFIDF()
 
 
@@ -37,7 +34,7 @@ class MoviesManager:
 
     def similarity(self, word, pattern):
         return difflib.SequenceMatcher(a=word.lower(), b=pattern.lower()).ratio()
-
+    '''
     def fuzzy_search(self, title):
         threshold = 0.6
         output = []
@@ -58,15 +55,27 @@ class MoviesManager:
         sorted_list1 = [element for _, element in sorted_zipped_lists]
 
         return sorted_list1
+    '''
+    def fuzzy_search(self, title, with_ratio =  False):
+        Ratios = process.extract(title ,self.sub_movies['original_title'].values)
+        if with_ratio:
+            return Ratios
+        else:
+            return [x[0] for x in Ratios]
+    
+    def fuzzy_find_genre(self, genre):        
+        highest = process.extractOne(genre,self.genres_loaded)
+        return highest[0]
 
     def find_similar_based_on_plot(self, title):
-
+        
         if title in self.indices.keys():
             idx=self.indices[title]
-        elif self.fuzzy_search(title)[0] in self.indices.keys():
-            idx=self.indices[self.fuzzy_search(title)[0]]
-            print("did you mean" ,self.fuzzy_search(title)[0], "?")
-
+        else:
+            fuzz = self.fuzzy_search(title)[0]
+            if fuzz in self.indices.keys():
+                idx=self.indices[fuzz]
+        
         idx = idx[0] if(isinstance(idx, list) or (not np.isscalar(idx)) ) else idx
         sim_scores = list(enumerate(self.cosine_sim[idx]))
         sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
@@ -80,9 +89,14 @@ class MoviesManager:
 
         if title in self.indices.keys():
             return True, self.sub_movies[self.sub_movies['original_title'] == title].iloc[[0]]
-        elif self.fuzzy_search(title)[0] in self.indices.keys():
-            print("did you mean" ,self.fuzzy_search(title)[0], "?")
-            return False, self.sub_movies[self.sub_movies['original_title'] == self.fuzzy_search(title)[0]].iloc[[0]]
+        else:
+            t = self.fuzzy_search(title, True)
+            if (t[0][1] > 90):
+                print("assuming ", t[0][0], "")
+                return True, self.sub_movies[self.sub_movies['original_title'] == t[0][0] ].iloc[[0]]
+            else:
+                print("did you mean ", t[0][0], " ?")
+                return False, self.sub_movies[self.sub_movies['original_title'] == t[0][0] ].iloc[[0]]
 
 
     def getMoveRating(self, movie : DataFrame , age:int, gender:int):
@@ -138,8 +152,13 @@ class MoviesManager:
 
         return rating
     
-    def similarityFactor(self, movie1: DataFrame, movie2 : DataFrame, script_similarity, age=0, gender=0):
+    def similarityFactor(self, movie1: DataFrame, movie2 : DataFrame, script_similarity, age=0, gender=0, time_important=False):
         similarity = 0
+
+        if time_important:
+            year_importance = 0.05
+        else:
+            year_importance = 0.03
 
         value1 = np.array(movie1['director_encoded'].values[0].strip("[").strip("]").split(), dtype=int)
         value2 = np.array(movie2['director_encoded'].values[0].strip("[").strip("]").split(), dtype=int)
@@ -158,10 +177,14 @@ class MoviesManager:
         
         similarity_factor += 0.05 * difflib.SequenceMatcher(a= value1, b=value2).ratio()
 
-        if (abs(int(movie1['year'].values[0]) - int(movie2['year'].values[0])) != 0 ):
-            similarity_factor += 0.05 * (1 /(abs(int(movie1['year'].values[0]) - int(movie2['year'].values[0]))))
-        else: 
-            similarity_factor += 0.05
+        try:
+            if (abs(int(movie1['year'].values[0]) - int(movie2['year'].values[0])) != 0 ):
+                similarity_factor += year_importance * (1 /(abs(int(movie1['year'].values[0]) - int(movie2['year'].values[0]))))
+            else: 
+                similarity_factor += year_importance
+        except ValueError: 
+            similarity_factor += 0.01
+        
         value1 = np.array(movie1['encoded_genre'].values[0].strip("[").strip("]").split(), dtype=int)
         value2 = np.array(movie2['encoded_genre'].values[0].strip("[").strip("]").split(), dtype=int)
         padding = abs(value1.shape[0] - value2.shape[0])
@@ -171,7 +194,7 @@ class MoviesManager:
         similarity_factor += 0.35 * difflib.SequenceMatcher(a= value1, b=value2).ratio()
         
         r = self.getMoveRating(movie2, age, gender)
-        similarity_factor += 0.3 * (r/10)
+        similarity_factor += (0.3 + (0.05 - year_importance)) * (r/10)
 
         
         
@@ -180,35 +203,14 @@ class MoviesManager:
         
         return similarity_factor , r
     
-    def recommend(self, movie):
+    def recommend(self, movie,  user_movie_list: DataFrame, user_hate_movie_list:DataFrame, user_not_care_movie_list:DataFrame,  age = 0, gender = User.NONBINARY):
         recommend_score = 0
         aux = 0
         movies_list = self.find_similar_based_on_plot(movie['original_title'].item())
-        movies_list = movies_list[1:math.floor(len(movies_list)*0.1)]
+        movies_list = movies_list[1:math.floor(len(movies_list)*0.05)]
+        print(math.floor(len(movies_list)*0.05))
         for m in movies_list: 
-            found, name = self.getMovieName(m[2])
-            s,r =self.similarityFactor(movie,name, m[1] )
-            aux = s
-            if aux > recommend_score : 
-                recommend_score = aux
-                movie_to_recommend = name
-        return recommend_score, movie_to_recommend
 
-
-    def recommend_from_user_list(self, user_movie_list: DataFrame, user_hate_movie_list:DataFrame, user_not_care_movie_list:DataFrame, age = 0, gender = NONBINARY):
-        recommend_score = 0
-        aux = 0
-        the_list = []
-        movie_to_recommend = None
-        portion = 0.1/len(user_movie_list)
-        for index, movie in user_movie_list.iterrows():
-            movies_list = self.find_similar_based_on_plot(movie['original_title'])
-            movies_list = movies_list[1:math.floor(len(movies_list)*portion)]
-            the_list.extend(movies_list)
-        the_list = [list(x) for x in set(tuple(x) for x in the_list)]
-        the_list = sorted(the_list, key=lambda x: x[1], reverse=True)
-        print(len(the_list))
-        for m in the_list: 
             found, name = self.getMovieName(m[2])
             if (user_movie_list is not None and  name.original_title.isin(user_movie_list.original_title).astype(bool).all()):
                 continue
@@ -216,24 +218,62 @@ class MoviesManager:
                 continue
             if (user_not_care_movie_list is not None and name.original_title.isin(user_not_care_movie_list.original_title).astype(bool).all()):
                 continue
-            aux = 0
-            aux_hate = 0
-            if user_movie_list is not None:
-                for index in range(len(user_movie_list)):
-                    user_m = user_movie_list.iloc[[index]]
-                    s, r = self.similarityFactor(user_m ,name, m[1], age, gender )
-                    aux += s
-            if user_hate_movie_list is not None:
-                for index in range(len(user_hate_movie_list)):
-                    user_m = user_hate_movie_list.iloc[[index]]
-                    s, r = self.similarityFactor(user_m ,name, m[1], age, gender )
-                    aux_hate += s
-            aux = aux - aux_hate
-            aux /= len(user_movie_list)
+
+            s, r = self.similarityFactor(movie ,name, m[1], age, gender)
+            aux = s
             if aux > recommend_score : 
                 recommend_score = aux
                 movie_to_recommend = name
-                print(r)
+        return recommend_score, movie_to_recommend
 
+
+    def recommend_from_user_list(self, user_movie_list: DataFrame, user_hate_movie_list:DataFrame, user_not_care_movie_list:DataFrame, age = 0, gender = User.NONBINARY, genre=None, time_important=False):
+        recommend_score = 0
+        aux = 0
+        the_list = []
+        genre = self.fuzzy_find_genre(genre)
+        movie_to_recommend = None
+        portion = 0.05/len(user_movie_list)
+        for index, movie in user_movie_list.iterrows():
+            movies_list = self.find_similar_based_on_plot(movie['original_title'])
+            movies_list = movies_list[1:math.floor(len(movies_list)*portion)]
+            the_list.extend(movies_list)
+        the_list = [list(x) for x in set(tuple(x) for x in the_list)]
+        looked_at = []
+        the_list = sorted(the_list, key=lambda x: x[1], reverse=True)
+        print(len(the_list))
+        for m in the_list: 
+            if m not in looked_at:
+                looked_at.append(m)
+                found, name = self.getMovieName(m[2])
+                
+                if (genre is not None and genre not in name.genre.values[0]):
+                    continue
+                if (user_movie_list is not None and  name.original_title.isin(user_movie_list.original_title).astype(bool).all()):
+                    continue
+                if (user_hate_movie_list is not None and name.original_title.isin(user_hate_movie_list.original_title).astype(bool).all()):
+                    continue
+                if (user_not_care_movie_list is not None and name.original_title.isin(user_not_care_movie_list.original_title).astype(bool).all()):
+                    continue
+                aux = 0
+                aux_hate = 0
+                if user_movie_list is not None:
+                    for index in range(len(user_movie_list)):
+                        user_m = user_movie_list.iloc[[index]]
+                        s, r = self.similarityFactor(user_m ,name, m[1], age, gender,  time_important)
+                        aux += s
+                if user_hate_movie_list is not None:
+                    for index in range(len(user_hate_movie_list)):
+                        user_m = user_hate_movie_list.iloc[[index]]
+                        s, r = self.similarityFactor(user_m ,name, m[1], age, gender, time_important )
+                        aux_hate += s
+                aux = aux - aux_hate
+                aux /= len(user_movie_list)
+                if aux > recommend_score : 
+                    recommend_score = aux
+                    movie_to_recommend = name
+                    print(r)
+                    
+            
         return recommend_score, movie_to_recommend
 

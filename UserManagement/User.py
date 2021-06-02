@@ -6,6 +6,11 @@ class User:
     LIKE = 1
     DISLIKE = 2
     DONT_CARE = 3
+
+    MALE = 1
+    FEMALE = 2
+    NONBINARY = 0
+    
     def __init__(self):
         self.user_movie_list : DataFrame = None
         self.user_hate_movie_list : DataFrame = None
