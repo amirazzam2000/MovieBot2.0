@@ -76,36 +76,31 @@ class ValidateUserForm(FormValidationAction):
             dispatcher.utter_message(text=f"That's a very short response... I'm assuming you mis-spelled.")
 
         else:
-            name = None
             entities = tracker.latest_message['entities']
+
             for e in entities:
-                # print(f"e = {e}")
+                print(f"e = {e}")
                 if str(e["entity"]) == "PERSON" and "value" in e:
                     name = str(e["value"])
-                    break
+                    dispatcher.utter_message(text=f"It's very nice to meet you {name}!")
+                    return {"permission_name_user": "true", "name_user": name}
 
-            if name is None:
-                intents = tracker.latest_message['intent']
-
-                if "confidence" not in intents:
-                    for i in intents:
-                        if str(i["name"]) == "affirm":
-                            return {"permission_name_user": "true"}
-                        if str(i["name"]) == "deny":
-                            dispatcher.utter_message(text=f"In that case I'll call you user33")
-                            return {"permission_name_user": "false", "name_user": "user33"}
-                else:
-                    if str(intents["name"]) == "affirm":
+            if "confidence" not in entities:
+                for e in entities:
+                    print(f"e = {e}")
+                    if str(e["value"]) == "Positive":
                         return {"permission_name_user": "true"}
-                    if str(intents["name"]) == "deny":
+                    if str(e["value"]) == "Negative":
                         dispatcher.utter_message(text=f"In that case I'll call you user33")
                         return {"permission_name_user": "false", "name_user": "user33"}
-
             else:
-                dispatcher.utter_message(text=f"It's very nice to meet you {name}!")
-                return {"permission_name_user": "true", "name_user": name}
+                if str(entities["value"]) == "Positive":
+                    return {"permission_name_user": "true"}
+                if str(entities["value"]) == "Negative":
+                    dispatcher.utter_message(text=f"In that case I'll call you user33")
+                    return {"permission_name_user": "false", "name_user": "user33"}
 
-        return {"permission_name_user": "false"}
+            return {"permission_name_user": "false"}
 
     def validate_name_user(
             self,
@@ -208,17 +203,17 @@ class ValidateUserForm(FormValidationAction):
                 age = str(e["value"])
                 break
         if age is None:
-            intents = tracker.latest_message['intent']
-            if "confidence" not in intents:
-                for i in intents:
-                    if str(i["name"]) == "affirm":
+            entities = tracker.latest_message['entities']
+            if "confidence" not in entities:
+                for e in entities:
+                    if str(e["value"]) == "Positive":
                         return {"permission_age_user": "true"}
-                    if str(i["name"]) == "deny":
+                    if str(e["value"]) == "Negative":
                         return {"permission_age_user": "false", "age_user": "0"}
             else:
-                if str(intents["name"]) == "affirm":
+                if str(entities["value"]) == "Positive":
                     return {"permission_age_user": "true"}
-                if str(intents["name"]) == "deny":
+                if str(entities["value"]) == "Negative":
                     return {"permission_age_user": "false", "age_user": "0"}
         else:
             return {"permission_age_user": "true", "age_user": age}
@@ -248,26 +243,26 @@ class ValidateUserForm(FormValidationAction):
             domain: DomainDict,
     ) -> Dict[Text, Any]:
 
-        intents = tracker.latest_message['intent']
+        entities = tracker.latest_message['entities']
 
-        if "confidence" not in intents:
-            for i in intents:
-                if str(i["name"]) == "affirm":
+        if "confidence" not in entities:
+            for e in entities:
+                if str(e["value"]) == "Positive":
                     return {"permission_initial_test_user": "true"}
-                if str(i["name"]) == "deny":
+                if str(e["value"]) == "Negative":
                     return {"permission_initial_test_user": "false"}
         else:
-            if str(intents["name"]) == "affirm":
+            if str(entities["value"]) == "Positive":
                 return {"permission_initial_test_user": "true"}
-            if str(intents["name"]) == "deny":
+            if str(entities["value"]) == "Negative":
                 return {"permission_initial_test_user": "false"}
 
         return {"permission_initial_test_user": "false"}
 
+
 class ValidateInitialTestForm(FormValidationAction):
     def name(self) -> Text:
         return "validate_initial_test_form"
-
 
     def validate_movie_1_initial_test(
             self,
@@ -279,15 +274,19 @@ class ValidateInitialTestForm(FormValidationAction):
 
         manager = MoviesManager()
         found, entry = manager.getMovieName(str(slot_value))
+        movie = str(entry['original_title'].item())
+        dispatcher.utter_message(text=f"let me see")
+        print(f"found = {found}")
+        print(f"entry = {movie}")
         # If the name is super short, it might be wrong.
-        if len(slot_value) <= 1:
+        if not found:
             dispatcher.utter_message(text=f"That's a very short name. I'm assuming you mis-spelled.")
-            return {"movie_1": None}
+            return {"movie_1_initial_test": None}
 
         else:
-            dispatcher.utter_message(text=f"Cool movie!")
+            dispatcher.utter_message(text=f"Yeah! {movie} is cool")
             # pass name to function
-            return {"movie_1": slot_value}
+            return {"movie_1_initial_test": movie}
 
     def validate_movie_2_initial_test(
             self,
@@ -297,15 +296,20 @@ class ValidateInitialTestForm(FormValidationAction):
             domain: DomainDict,
     ) -> Dict[Text, Any]:
 
-        # If the name is super short, it might be wrong.
-        if len(slot_value) <= 1:
-            dispatcher.utter_message(text=f"That's a very short name. I'm assuming you mis-spelled.")
-            return {"movie_2": None}
+            manager = MoviesManager()
+            found, entry = manager.getMovieName(str(slot_value))
+            movie = str(entry['original_title'].item())
+            print(f"found = {found}")
+            print(f"entry = {movie}")
+            # If the name is super short, it might be wrong.
+            if not found:
+                dispatcher.utter_message(text=f"That's a very short name. I'm assuming you mis-spelled.")
+                return {"movie_2_initial_test": None}
 
-        else:
-            dispatcher.utter_message(text=f"Interesting choice")
-            # pass name to function
-            return {"movie_2": slot_value}
+            else:
+                dispatcher.utter_message(text=f"{movie} is certainly interesting")
+                # pass name to function
+                return {"movie_2_initial_test": movie}
 
     def validate_movie_3_initial_test(
             self,
@@ -315,12 +319,17 @@ class ValidateInitialTestForm(FormValidationAction):
             domain: DomainDict,
     ) -> Dict[Text, Any]:
 
-        # If the name is super short, it might be wrong.
-        if len(slot_value) <= 1:
-            dispatcher.utter_message(text=f"That's a very short name. I'm assuming you mis-spelled.")
-            return {"movie_3": None}
+            manager = MoviesManager()
+            found, entry = manager.getMovieName(str(slot_value))
+            movie = str(entry['original_title'].item())
+            print(f"found = {found}")
+            print(f"entry = {movie}")
+            # If the name is super short, it might be wrong.
+            if not found:
+                dispatcher.utter_message(text=f"That's a very short name. I'm assuming you mis-spelled.")
+                return {"movie_3_initial_test": None}
 
-        else:
-            dispatcher.utter_message(text=f"Perfect!")
-            # pass name to function
-            return {"movie_3": slot_value}
+            else:
+                dispatcher.utter_message(text=f"Good choice! I also like {movie}")
+                # pass name to function
+                return {"movie_3_initial_test": movie}
