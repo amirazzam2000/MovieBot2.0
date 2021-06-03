@@ -11,11 +11,11 @@ class User:
     NONBINARY = 0
     
     def __init__(self):
-        self.user_movie_list : DataFrame = None
-        self.user_hate_movie_list : DataFrame = None
-        self.user_not_care_movie_list : DataFrame = None
+        self.user_movie_list: DataFrame = None
+        self.user_hate_movie_list: DataFrame = None
+        self.user_not_care_movie_list: DataFrame = None
     
-    def addMovie(self, movie:DataFrame, preference : int):
+    def addMovie(self, movie:DataFrame, preference: int):
         if preference == self.LIKE: 
             if self.user_movie_list is None:
                 self.user_movie_list = pd.concat([movie])

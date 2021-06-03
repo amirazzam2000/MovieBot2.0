@@ -1,3 +1,4 @@
+from nltk.sentiment import SentimentIntensityAnalyzer
 from rasa.nlu.components import Component
 from rasa.nlu import utils
 from rasa.nlu.model import Metadata
@@ -73,6 +74,7 @@ class SentimentAnalyzer(Component):
         nltk.download('twitter_samples')
         nltk.download('punkt')
         nltk.download('stopwords')
+        nltk.download('vader_lexicon')
 
         positive_tweets = twitter_samples.strings('positive_tweets.json')
         negative_tweets = twitter_samples.strings('negative_tweets.json')
@@ -116,13 +118,13 @@ class SentimentAnalyzer(Component):
 
         self.classifier = NaiveBayesClassifier.train(train_data)
 
-    def convert_to_rasa(self, value, confidence):
+    def convert_to_rasa(self, value, confidence, name):
         """Convert model output into the Rasa NLU compatible output format."""
 
         entity = {"value": value,
                   "confidence": confidence,
                   "entity": "sentiment",
-                  "extractor": "sentiment_extractor"}
+                  "extractor": name}
 
         return entity
 
@@ -138,19 +140,27 @@ class SentimentAnalyzer(Component):
             self.train()
 
         if message.get("text") is not None:
-            #tokens = [t.text for t in message.get("tokens")]
-            #tb = self.preprocessing(tokens)
-            # pred = self.clf.prob_classify(tb)
+            sid = SentimentIntensityAnalyzer()
+            res = sid.polarity_scores(message.get("text"))
+            key, value = max(res.items(), key=lambda x: x[1])
 
+            if key == "pos":
+                key = "Positive"
+            elif key == "neg":
+                key = "Negative"
+            else:
+                key = "Neutral"
 
             custom_tokens = self.remove_noise(word_tokenize(message.get("text")))
-
             t = self.classifier.prob_classify(dict([token, True] for token in custom_tokens))
 
             sentiment = 'Positive' if t.prob('Positive') > t.prob('Negative') else 'Negative'
-            confidence = max(t.prob('Positive') , t.prob('Negative'))
+            confidence = max(t.prob('Positive'), t.prob('Negative'))
 
-            entity = self.convert_to_rasa(sentiment, confidence)
+            if len(message.get("text")) > 20:
+                entity = self.convert_to_rasa(sentiment, confidence, name="our_sentiment_extractor")
+            else:
+                entity = self.convert_to_rasa(key, value, name="builtin_sentiment_extractor")
 
             message.set("entities", [entity], add_to_output=True)
 

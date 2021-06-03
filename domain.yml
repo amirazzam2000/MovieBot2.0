@@ -58,6 +58,9 @@ slots:
   movie_3_initial_test:
     type: text
     influence_conversation: false
+  user_data:
+    type: any
+
 forms:
   user_form:
     required_slots:

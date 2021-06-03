@@ -5,6 +5,8 @@ from Telegram.BotManager import BotManager
 from  UserManagement.User import User
 from colors import blue, red, yellow, green
 from DataManagement.MoviesRecommender import MoviesManager
+import pickle
+import time
 
 def main():
     bot = BotManager()
@@ -26,9 +28,15 @@ def test_question():
 
 
 def recommend():
-    manager = MoviesManager()
+    init_time = time.time()
     user = User()
-    
+    try:
+        with open('Resources/manger.pkl', 'rb') as file:
+            manager = pickle.load(file)
+            print("reading from file")
+    except IOError:
+        manager = MoviesManager()
+    print(time.time()-init_time)
     age=int(input(blue('what is your age: ')))
     gender=int(input(blue('what is your gender (0. nonbinary / 1. male / 2. female):')))
     time_aux=(input(blue('do you care about the year the movie came out? (y/n): ')))

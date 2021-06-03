@@ -1,4 +1,7 @@
+import json
 from typing import Any, Text, Dict, List
+
+import pandas
 from rasa_sdk.events import SlotSet
 from rasa_sdk import Action, Tracker
 from rasa_sdk import Tracker, FormValidationAction
@@ -6,9 +9,12 @@ from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.types import DomainDict
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import EventType
+import pickle5 as pickle
 
 from DataManagement.MoviesRecommender import MoviesManager
+from UserManagement.User import User
 
+import pandas as pd
 
 class BotFavouriteMovie(Action):
 
@@ -272,21 +278,49 @@ class ValidateInitialTestForm(FormValidationAction):
             domain: DomainDict,
     ) -> Dict[Text, Any]:
 
-        manager = MoviesManager()
+        user = tracker.get_slot("user_data")
+
+        try:
+            with open('Resources/manger.pkl', 'rb') as file:
+                manager = pickle.load(file)
+                print("reading from file")
+        except IOError:
+            print("Could not open the file")
+            manager = MoviesManager()
+
+        if user is None:
+            user = dict()
+            user['like_list'] = None
+            user['unlike_list'] = None
+            user['not_care_list'] = None
+            print("setting a value!!")
+        else:
+            print("already set!")
+
         found, entry = manager.getMovieName(str(slot_value))
         movie = str(entry['original_title'].item())
         dispatcher.utter_message(text=f"let me see")
+
+        if user['like_list'] is None:
+            user['like_list'] = pd.concat([entry])
+        else:
+
+            user['like_list'] = pandas.read_json(user['like_list'])
+            user['like_list'] = user['like_list'].append([entry])
+
+        user['like_list'] = user['like_list'].to_json()
         print(f"found = {found}")
         print(f"entry = {movie}")
         # If the name is super short, it might be wrong.
         if not found:
+
             dispatcher.utter_message(text=f"That's a very short name. I'm assuming you mis-spelled.")
-            return {"movie_1_initial_test": None}
+            return {"movie_1_initial_test": None, "user_data": user}
 
         else:
             dispatcher.utter_message(text=f"Yeah! {movie} is cool")
             # pass name to function
-            return {"movie_1_initial_test": movie}
+            return {"movie_1_initial_test": movie, "user_data": user}
 
     def validate_movie_2_initial_test(
             self,
@@ -296,9 +330,36 @@ class ValidateInitialTestForm(FormValidationAction):
             domain: DomainDict,
     ) -> Dict[Text, Any]:
 
-            manager = MoviesManager()
+            try:
+                with open('Resources/manger.pkl', 'rb') as file:
+                    manager = pickle.load(file)
+                    print("reading from file")
+            except IOError:
+                print("Could not open the file")
+                manager = MoviesManager()
+
+            user = tracker.get_slot("user_data")
+            if user is None:
+                user = dict()
+                user['like_list'] = None
+                user['unlike_list'] = None
+                user['not_care_list'] = None
+                print("setting a value!!")
+            else:
+                print("already set!")
+
             found, entry = manager.getMovieName(str(slot_value))
             movie = str(entry['original_title'].item())
+            dispatcher.utter_message(text=f"let me see")
+
+            if user['like_list'] is None:
+                user['like_list'] = pd.concat([entry])
+            else:
+                user['like_list'] = pandas.read_json(user['like_list'])
+                user['like_list'] = user['like_list'].append([entry])
+
+            user['like_list'] = user['like_list'].to_json()
+
             print(f"found = {found}")
             print(f"entry = {movie}")
             # If the name is super short, it might be wrong.
@@ -319,7 +380,13 @@ class ValidateInitialTestForm(FormValidationAction):
             domain: DomainDict,
     ) -> Dict[Text, Any]:
 
-            manager = MoviesManager()
+            try:
+                with open('Resources/manger.pkl', 'rb') as file:
+                    manager = pickle.load(file)
+                    print("reading from file")
+            except IOError:
+                print("Could not open the file")
+                manager = MoviesManager()
             found, entry = manager.getMovieName(str(slot_value))
             movie = str(entry['original_title'].item())
             print(f"found = {found}")
