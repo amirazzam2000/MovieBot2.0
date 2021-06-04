@@ -1,4 +1,4 @@
-from DataManagement.MoviesRecommender import Singleton
+
 import json
 from typing import Any, Text, Dict, List
 
@@ -15,7 +15,7 @@ import pickle5 as pickle
 
 from UserManagement.User import User
 
-from DataManagement.MoviesRecommender import Singleton
+from DataManagement.MoviesRecommender import MoviesManager
 import pandas as pd
 
 
@@ -253,7 +253,8 @@ class ValidateInitialTestForm(FormValidationAction):
         user = tracker.get_slot("user_data")
         not_sure = tracker.get_slot("movie_not_sure")
         name_user = tracker.get_slot("name_user")
-        manager = Singleton()
+        manager = MoviesManager.getInstance()
+        print(manager)
         movies = tracker.latest_message['movies'][0]
 
         if user is None:

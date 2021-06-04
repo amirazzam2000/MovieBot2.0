@@ -20,15 +20,15 @@ from fuzzywuzzy import process
 import time
 
 
-class Singleton(type):
-    """ A metaclass that creates a Singleton base class when called. """
-    _instances = {}
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
+class MoviesManager():
+    __instance = None
+    @staticmethod
+    def getInstance():
+        """ Static access method. """
+        if MoviesManager.__instance == None:
+            MoviesManager()
+        return MoviesManager.__instance
 
-class MoviesManager(metaclass=Singleton):
     def __init__(self):
         init_time = time.time()
         self.sub_movies = pd.read_csv('Resources/sub_movies.csv', low_memory=False)
@@ -46,6 +46,7 @@ class MoviesManager(metaclass=Singleton):
             pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
 
         print((time.time() - init_time))
+        MoviesManager.__instance = self
 
     def init_TFIDF(self):
         tfidf = TfidfVectorizer(stop_words='english')
