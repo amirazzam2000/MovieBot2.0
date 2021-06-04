@@ -130,5 +130,5 @@ dmypy.json
 Resources/MovieSummaries.tar/*
 
 test/models/*.tar.gz
-.vscode
-.idea
+.vscode/*
+.idea/*
