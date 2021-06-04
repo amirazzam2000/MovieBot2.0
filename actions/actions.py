@@ -1,3 +1,4 @@
+from DataManagement.MoviesRecommender import Singleton
 import json
 from typing import Any, Text, Dict, List
 
@@ -9,12 +10,14 @@ from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.types import DomainDict
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import EventType
+import random
 import pickle5 as pickle
 
-from DataManagement.MoviesRecommender import MoviesManager
 from UserManagement.User import User
 
+from DataManagement.MoviesRecommender import Singleton
 import pandas as pd
+
 
 class BotFavouriteMovie(Action):
 
@@ -37,6 +40,7 @@ class Greet(Action):
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+
         name_user = tracker.get_slot("name_user")
         if name_user is None:
             dispatcher.utter_message(text=f"Hello stranger!")
@@ -56,9 +60,9 @@ class ActionSayName(Action):
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
 
-        name = tracker.get_slot("name")
+        name = tracker.get_slot("name_user")
         if not name:
-            dispatcher.utter_message(text="I don't know your name. That's why I call you {name}")
+            dispatcher.utter_message(text=f"I don't know your name. That's why I call you {name}")
         else:
             dispatcher.utter_message(text=f"Your name is {name}!")
         return []
@@ -80,33 +84,29 @@ class ValidateUserForm(FormValidationAction):
 
         if len(slot_value) <= 1:
             dispatcher.utter_message(text=f"That's a very short response... I'm assuming you mis-spelled.")
-
+            return {"permission_gender_user": None}
         else:
             entities = tracker.latest_message['entities']
-
             for e in entities:
-                print(f"e = {e}")
-                if str(e["entity"]) == "PERSON" and "value" in e:
-                    name = str(e["value"])
-                    dispatcher.utter_message(text=f"It's very nice to meet you {name}!")
-                    return {"permission_name_user": "true", "name_user": name}
+                if str(e["entity"]) == "PERSON":
+                    if "value" in e:
+                        name = str(e["value"])
+                        dispatcher.utter_message(text=f"It's very nice to meet you {name}!")
+                        return {"permission_name_user": "true", "name_user": name}
 
-            if "confidence" not in entities:
-                for e in entities:
-                    print(f"e = {e}")
-                    if str(e["value"]) == "Positive":
-                        return {"permission_name_user": "true"}
-                    if str(e["value"]) == "Negative":
-                        dispatcher.utter_message(text=f"In that case I'll call you user33")
-                        return {"permission_name_user": "false", "name_user": "user33"}
-            else:
-                if str(entities["value"]) == "Positive":
-                    return {"permission_name_user": "true"}
-                if str(entities["value"]) == "Negative":
-                    dispatcher.utter_message(text=f"In that case I'll call you user33")
-                    return {"permission_name_user": "false", "name_user": "user33"}
+            sentiment =  tracker.latest_message['sentiment'][0]
+            if str(sentiment["value"]) == "Positive":
+                return {"permission_name_user": "true"}
+            if str(sentiment["value"]) == "Negative":
+                n = random.randint(0,1000)
+                name = "user" + str(n)
+                dispatcher.utter_message(text=f"Then I'm going to call you {name}!")
+                return {"permission_name_user": "false", "name_user": name}
 
-            return {"permission_name_user": "false"}
+
+
+            return {"permission_gender_user": "false"}
+
 
     def validate_name_user(
             self,
@@ -146,31 +146,22 @@ class ValidateUserForm(FormValidationAction):
             dispatcher.utter_message(text=f"That's a very short response... I'm assuming you mis-spelled.")
 
         else:
-            gender = None
             entities = tracker.latest_message['entities']
-
             for e in entities:
                 if str(e["entity"]) == "gender" and "value" in e:
-                    gender = str(e["value"])
-                    break
-            if gender is None:
-                intents = tracker.latest_message['intent']
+                    dispatcher.utter_message(text=f"Okay! Now I'll be able to provide more accurate results.")
+                    return {"permission_gender_user": "true", "gender_user": str(e["value"])}
 
-                if "confidence" not in intents:
-                    for i in intents:
-                        if str(i["name"]) == "affirm":
-                            return {"permission_gender_user": "true"}
-                        if str(i["name"]) == "deny":
-                            return {"permission_gender_user": "false", "gender_user": "nonbinary"}
-                else:
-                    if str(intents["name"]) == "affirm":
-                        return {"permission_gender_user": "true"}
-                    if str(intents["name"]) == "deny":
-                        return {"permission_gender_user": "false", "gender_user": "nonbinary"}
-            else:
-                return {"permission_gender_user": "true", "gender_user": gender}
+            sentiment =  tracker.latest_message['sentiment'][0]
+            if str(sentiment["value"]) == "Positive":
+                print("You said YEEES")
+                return {"permission_gender_user": "true"}
+            if str(sentiment["value"]) == "Negative":
+                print("You said NOOOO")
+                return {"permission_gender_user": "false", "gender_user": "nonbinary"}
 
-            return {"permission_gender_user": "false"}
+            print("I assume you said NOOOO")
+            return {"permission_gender_user": "false", "gender_user": "nonbinary"}
 
     def validate_gender_user(
             self,
@@ -202,29 +193,17 @@ class ValidateUserForm(FormValidationAction):
             domain: DomainDict,
     ) -> Dict[Text, Any]:
 
-        age = None
+        sentiment =  tracker.latest_message['sentiment'][0]
         entities = tracker.latest_message['entities']
         for e in entities:
             if (e["entity"] == "CARDINAL" or e["entity"] == "age") and "value" in e:
-                age = str(e["value"])
-                break
-        if age is None:
-            entities = tracker.latest_message['entities']
-            if "confidence" not in entities:
-                for e in entities:
-                    if str(e["value"]) == "Positive":
-                        return {"permission_age_user": "true"}
-                    if str(e["value"]) == "Negative":
-                        return {"permission_age_user": "false", "age_user": "0"}
-            else:
-                if str(entities["value"]) == "Positive":
-                    return {"permission_age_user": "true"}
-                if str(entities["value"]) == "Negative":
-                    return {"permission_age_user": "false", "age_user": "0"}
-        else:
-            return {"permission_age_user": "true", "age_user": age}
+                return {"permission_age_user": "true", "age_user": str(e["value"])}
 
-        return {"permission_age_user": "false"}
+        if str(sentiment["value"]) == "Positive":
+            return {"permission_age_user": "true"}
+        if str(sentiment["value"]) == "Negative":
+            return {"permission_age_user": "false", "age_user": None}
+        return {"permission_age_user": "true"}
 
     def validate_age_user(
             self,
@@ -233,7 +212,6 @@ class ValidateUserForm(FormValidationAction):
             tracker: Tracker,
             domain: DomainDict,
     ) -> Dict[Text, Any]:
-
         entities = tracker.latest_message['entities']
         for e in entities:
             if (e["entity"] == "CARDINAL" or e["entity"] == "age") and "value" in e:
@@ -249,28 +227,22 @@ class ValidateUserForm(FormValidationAction):
             domain: DomainDict,
     ) -> Dict[Text, Any]:
 
-        entities = tracker.latest_message['entities']
+        entities =  tracker.latest_message['sentiment'][0]
 
-        if "confidence" not in entities:
-            for e in entities:
-                if str(e["value"]) == "Positive":
-                    return {"permission_initial_test_user": "true"}
-                if str(e["value"]) == "Negative":
-                    return {"permission_initial_test_user": "false"}
-        else:
-            if str(entities["value"]) == "Positive":
-                return {"permission_initial_test_user": "true"}
-            if str(entities["value"]) == "Negative":
-                return {"permission_initial_test_user": "false"}
+        if str(entities["value"]) == "Positive":
+            return {"permission_initial_test_user": "true"}
 
-        return {"permission_initial_test_user": "false"}
+        elif str(entities["value"]) == "Negative":
+            return {"permission_initial_test_user": "false"}
+
+        return {"permission_initial_test_user": "true"}
 
 
 class ValidateInitialTestForm(FormValidationAction):
     def name(self) -> Text:
         return "validate_initial_test_form"
 
-    def validate_movie_1_initial_test(
+    def validate_movie_initial_test(
             self,
             slot_value: Any,
             dispatcher: CollectingDispatcher,
@@ -279,124 +251,53 @@ class ValidateInitialTestForm(FormValidationAction):
     ) -> Dict[Text, Any]:
 
         user = tracker.get_slot("user_data")
-
-        try:
-            with open('Resources/manger.pkl', 'rb') as file:
-                manager = pickle.load(file)
-                print("reading from file")
-        except IOError:
-            print("Could not open the file")
-            manager = MoviesManager()
+        not_sure = tracker.get_slot("movie_not_sure")
+        name_user = tracker.get_slot("name_user")
+        manager = Singleton()
+        movies = tracker.latest_message['movies'][0]
 
         if user is None:
             user = dict()
-            user['like_list'] = None
-            user['unlike_list'] = None
-            user['not_care_list'] = None
+            user['like_list'] = []
+            user['unlike_list'] = []
+            user['not_care_list'] = []
             print("setting a value!!")
         else:
             print("already set!")
 
-        found, entry = manager.getMovieName(str(slot_value))
-        movie = str(entry['original_title'].item())
+        # answer a yes no question
+        if not_sure is not None:
+            entities =  tracker.latest_message['sentiment'][0]
+
+            if str(entities["value"]) == "Positive":
+                user['like_list'].append(not_sure)
+                if len(user['like_list']) < 3:
+                    dispatcher.utter_message(text=f"Could you give me another movie?")
+            else: 
+                dispatcher.utter_message(text=f"Ohh ... Sorry then could you say the name again?")
+
+            if len(user['like_list']) >= 3:
+                dispatcher.utter_message(text=f"Thanks {name_user}")
+                return {"movie_initial_test": "true", "user_data": user, "movie_not_sure" : None}
+                
+            return {"movie_not_sure": None,"movie_initial_test": None , "user_data": user}
+        
+
         dispatcher.utter_message(text=f"let me see")
-
-        if user['like_list'] is None:
-            user['like_list'] = pd.concat([entry])
-        else:
-
-            user['like_list'] = pandas.read_json(user['like_list'])
-            user['like_list'] = user['like_list'].append([entry])
-
-        user['like_list'] = user['like_list'].to_json()
-        print(f"found = {found}")
-        print(f"entry = {movie}")
-        # If the name is super short, it might be wrong.
-        if not found:
-
-            dispatcher.utter_message(text=f"That's a very short name. I'm assuming you mis-spelled.")
-            return {"movie_1_initial_test": None, "user_data": user}
-
-        else:
+        found = movies["found"]
+        movie = movies["name"]
+        if found:
+            user['like_list'].append(movie)
+            print(f"found = {found}")
+            print(f"entry = {movie}")
             dispatcher.utter_message(text=f"Yeah! {movie} is cool")
             # pass name to function
-            return {"movie_1_initial_test": movie, "user_data": user}
-
-    def validate_movie_2_initial_test(
-            self,
-            slot_value: Any,
-            dispatcher: CollectingDispatcher,
-            tracker: Tracker,
-            domain: DomainDict,
-    ) -> Dict[Text, Any]:
-
-            try:
-                with open('Resources/manger.pkl', 'rb') as file:
-                    manager = pickle.load(file)
-                    print("reading from file")
-            except IOError:
-                print("Could not open the file")
-                manager = MoviesManager()
-
-            user = tracker.get_slot("user_data")
-            if user is None:
-                user = dict()
-                user['like_list'] = None
-                user['unlike_list'] = None
-                user['not_care_list'] = None
-                print("setting a value!!")
-            else:
-                print("already set!")
-
-            found, entry = manager.getMovieName(str(slot_value))
-            movie = str(entry['original_title'].item())
-            dispatcher.utter_message(text=f"let me see")
-
-            if user['like_list'] is None:
-                user['like_list'] = pd.concat([entry])
-            else:
-                user['like_list'] = pandas.read_json(user['like_list'])
-                user['like_list'] = user['like_list'].append([entry])
-
-            user['like_list'] = user['like_list'].to_json()
-
-            print(f"found = {found}")
-            print(f"entry = {movie}")
+            if len(user['like_list']) >= 3:
+                dispatcher.utter_message(text=f"Thanks {name_user}")
+                return {"movie_initial_test": "true", "user_data": user}
+            dispatcher.utter_message(text=f"Could you give me another movie?")
+            return {"movie_initial_test": None , "user_data": user}
             # If the name is super short, it might be wrong.
-            if not found:
-                dispatcher.utter_message(text=f"That's a very short name. I'm assuming you mis-spelled.")
-                return {"movie_2_initial_test": None}
-
-            else:
-                dispatcher.utter_message(text=f"{movie} is certainly interesting")
-                # pass name to function
-                return {"movie_2_initial_test": movie}
-
-    def validate_movie_3_initial_test(
-            self,
-            slot_value: Any,
-            dispatcher: CollectingDispatcher,
-            tracker: Tracker,
-            domain: DomainDict,
-    ) -> Dict[Text, Any]:
-
-            try:
-                with open('Resources/manger.pkl', 'rb') as file:
-                    manager = pickle.load(file)
-                    print("reading from file")
-            except IOError:
-                print("Could not open the file")
-                manager = MoviesManager()
-            found, entry = manager.getMovieName(str(slot_value))
-            movie = str(entry['original_title'].item())
-            print(f"found = {found}")
-            print(f"entry = {movie}")
-            # If the name is super short, it might be wrong.
-            if not found:
-                dispatcher.utter_message(text=f"That's a very short name. I'm assuming you mis-spelled.")
-                return {"movie_3_initial_test": None}
-
-            else:
-                dispatcher.utter_message(text=f"Good choice! I also like {movie}")
-                # pass name to function
-                return {"movie_3_initial_test": movie}
+        else:
+            dispatcher.utter_message(text=f"you are reffering to \"{movie}\", right?")
+            return {"movie_initial_test": None , "movie_not_sure": movie, "user_data": user}

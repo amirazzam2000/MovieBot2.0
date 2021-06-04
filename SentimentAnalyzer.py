@@ -3,7 +3,7 @@ from rasa.nlu.components import Component
 from rasa.nlu import utils
 from rasa.nlu.model import Metadata
 import re, string, random
-
+from DataManagement.MoviesRecommender import MoviesManager
 import nltk
 from nltk.classify import NaiveBayesClassifier
 import os
@@ -31,6 +31,7 @@ class SentimentAnalyzer(Component):
     def __init__(self, component_config=None):
         super(SentimentAnalyzer, self).__init__(component_config)
         self.classifier = None
+        self.manager = MoviesManager()
         self.train()
 
     def remove_noise(self, tweet_tokens, stop_words=()):
@@ -128,6 +129,16 @@ class SentimentAnalyzer(Component):
 
         return entity
 
+    def convert_movie_to_rasa(self, value, found):
+        """Convert model output into the Rasa NLU compatible output format."""
+
+        entity = {"name": value,
+                  "found": found,
+                  "entity": "movie_name",
+                  "extractor": "our_fuzzy_logic"}
+
+        return entity
+
     def preprocessing(self, tokens):
         """Create bag-of-words representation of the training examples."""
 
@@ -157,12 +168,17 @@ class SentimentAnalyzer(Component):
             sentiment = 'Positive' if t.prob('Positive') > t.prob('Negative') else 'Negative'
             confidence = max(t.prob('Positive'), t.prob('Negative'))
 
+            found, entry = self.manager.getMovieName(message.get("text"))
+            movie = str(entry['original_title'].item())
+
             if len(message.get("text")) > 20:
                 entity = self.convert_to_rasa(sentiment, confidence, name="our_sentiment_extractor")
             else:
                 entity = self.convert_to_rasa(key, value, name="builtin_sentiment_extractor")
 
-            message.set("entities", [entity], add_to_output=True)
+            message.set("sentiment", [entity], add_to_output=True)
+            entity = self.convert_movie_to_rasa(movie, found)
+            message.set("movies", [entity], add_to_output=True)
 
     def persist(self, file_name, model_dir):
         """Persist this model into the passed directory

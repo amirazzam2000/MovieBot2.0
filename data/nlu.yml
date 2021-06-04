@@ -84,12 +84,6 @@ nlu:
     - are you a human?
     - am I talking to a bot?
     - am I talking to a human?
-- intent: give_bot_favourite_movie
-  examples: |
-    - what is your favourite movie?
-    - tell me your favourite movie?
-    - what's your favourite movie?
-    - what movie do you like?
 - intent: repeat_name
   examples: |
     - what is my name?

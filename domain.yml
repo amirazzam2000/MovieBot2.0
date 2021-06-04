@@ -12,7 +12,6 @@ intents:
 - mood_great
 - mood_unhappy
 - bot_challenge
-- give_bot_favourite_movie
 - repeat_name
 - recommend_movie
 - get_gender
@@ -49,13 +48,10 @@ slots:
   permission_initial_test_user:
     type: bool
     influence_conversation: true
-  movie_1_initial_test:
+  movie_initial_test:
     type: text
     influence_conversation: false
-  movie_2_initial_test:
-    type: text
-    influence_conversation: false
-  movie_3_initial_test:
+  movie_not_sure:
     type: text
     influence_conversation: false
   user_data:
@@ -80,13 +76,8 @@ forms:
       - type: from_text
   initial_test_form:
     required_slots:
-      movie_1_initial_test:
+      movie_initial_test:
         - type: from_text
-      movie_2_initial_test:
-        - type: from_text
-      movie_3_initial_test:
-        - type: from_text
-
 
 responses:
   utter_cheer_up:
@@ -118,17 +109,13 @@ responses:
           Can I ask you a few questions? It will take a couple minutes.
   utter_submit:
   - text: Ok. Thanks {name_user}!
-  utter_ask_movie_1_initial_test:
-  - text: >
+  utter_test_info:
+  - text: > 
       Great!
-      This test is very simple. Just give me the name of 3 movies you like.
-      If they are from different gender the more customized the recommendations will be.
+      This test is very simple. I'll ask for the name of 3 movies you like.
+      Try to choose them from different genres as then I would be able to recommend more costumised movies.
       Let's get started with the first one.
       Tell me the name of a movie you like.
-  utter_ask_movie_2_initial_test:
-    - text: Tell me another movie you like.
-  utter_ask_movie_3_initial_test:
-    - text: We're almost done... one more movie please.
 actions:
 - action_bot_favourite_movie
 - action_greet
@@ -137,5 +124,6 @@ actions:
 - utter_greet
 - utter_slots_values
 - utter_submit
+- utter_test_info
 - validate_user_form
 - validate_initial_test_form

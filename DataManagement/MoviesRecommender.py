@@ -11,13 +11,24 @@ import math
 import array
 from pandas import DataFrame
 from UserManagement.User import User
+
+try:
+    import pickle5 as pickle
+except ImportError:
+    import pickle
 from fuzzywuzzy import process
-import pickle5 as pickle
-#import pickle
 import time
 
 
-class MoviesManager:
+class Singleton(type):
+    """ A metaclass that creates a Singleton base class when called. """
+    _instances = {}
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+class MoviesManager(metaclass=Singleton):
     def __init__(self):
         init_time = time.time()
         self.sub_movies = pd.read_csv('Resources/sub_movies.csv', low_memory=False)
@@ -77,8 +88,17 @@ class MoviesManager:
         return sorted_list1
     '''
 
-    def fuzzy_search(self, title, with_ratio=False):
-        Ratios = process.extract(title, self.sub_movies['original_title'].values)
+    def fuzzy_search(self, title: str, with_ratio=False):
+        word_list = []
+        for word in title.split(" "):
+            word_list.append(word.capitalize()[0])
+        if 'T' not in word_list:
+            word_list.append('T')
+
+        print(word_list)
+        s = self.sub_movies.loc[self.sub_movies['original_title'].str.startswith(tuple(word_list)), 'original_title']
+        # print(sorted(s, key=lambda x : x[0]))
+        Ratios = process.extract(title, s)
         if with_ratio:
             return Ratios
         else:
