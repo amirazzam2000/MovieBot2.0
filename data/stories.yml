@@ -18,6 +18,9 @@ stories:
   - action: initial_test_form
   - active_loop: initial_test_form
   - active_loop: null
+  - slot_was_set:
+     - movie_initial_test: true
+  - action: utter_test_done
 
 - story: greet new user and do not do initial test
   steps:
@@ -31,6 +34,23 @@ stories:
   - slot_was_set:
      - permission_initial_test_user: false
   - action: utter_submit
+
+- story: recommend movie based on genre
+  steps:
+  - intent: recommend_movie
+  - action: action_recommend_genre
+  - slot_was_set:
+    - recommend_genre: true
+  - action: utter_goodbye
+
+- story: recommend movie NOT based on genre
+  steps:
+  - intent: recommend_movie
+  - action: recommend_genre
+  - slot_was_set:
+    - recommend_genre: false
+  - action: utter_happy
+
 
 - story: greet existing user
   steps:

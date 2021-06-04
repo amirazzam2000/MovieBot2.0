@@ -50,12 +50,22 @@ slots:
     influence_conversation: true
   movie_initial_test:
     type: text
-    influence_conversation: false
+    influence_conversation: true
   movie_not_sure:
     type: text
     influence_conversation: false
+  last_movie:
+    type: text
+    influence_conversation: false
+  check_last_movie_intent:
+    type: bool
+    influence_conversation: false
   user_data:
     type: any
+    influence_conversation: false
+  recommend_genre:
+    type: text
+    influence_conversation: false
 
 forms:
   user_form:
@@ -78,7 +88,6 @@ forms:
     required_slots:
       movie_initial_test:
         - type: from_text
-
 responses:
   utter_cheer_up:
   - text: 'Here is something to cheer you up:'
@@ -116,14 +125,23 @@ responses:
       Try to choose them from different genres as then I would be able to recommend more costumised movies.
       Let's get started with the first one.
       Tell me the name of a movie you like.
+  action_recommend_genre:
+  - text: Would you like to watch a movie from a specific genre?
+  utter_test_done:
+  - text: > 
+      Now you can ask me to recommend movies or you can tell me more movies you like or dislike to prove an even more customizable recomendations 😊
+
+
 actions:
 - action_bot_favourite_movie
 - action_greet
 - action_receive_name
 - action_say_name
+- action_recommend_genre
 - utter_greet
 - utter_slots_values
 - utter_submit
 - utter_test_info
+- utter_test_done
 - validate_user_form
 - validate_initial_test_form

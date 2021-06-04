@@ -95,6 +95,15 @@ nlu:
     - What movie should I watch?
     - I want to watch a movie
     - What movie should I watch?
+    - I don't know what to watch
+    - Help me out
+    - Can you help me find a movie to watch? 
+    - What movie should I watch next? 
+    - Movie recommendation
+    - Recommend
+    - Movie
+    - movie
+    - recommend
 - intent: years_old
   examples: |
     - I'm [30](age) years old

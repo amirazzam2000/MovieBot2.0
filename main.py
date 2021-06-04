@@ -99,6 +99,7 @@ def recommend():
         
         user.print()
 
+
 if __name__ == '__main__':
     # sentimentAnalysis = SentimentAnalyzer()
     # questionManger = QuestionsManager()

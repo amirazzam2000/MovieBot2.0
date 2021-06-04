@@ -31,7 +31,8 @@ class SentimentAnalyzer(Component):
     def __init__(self, component_config=None):
         super(SentimentAnalyzer, self).__init__(component_config)
         self.classifier = None
-        self.manager = MoviesManager()
+        self.manager = MoviesManager.getInstance()
+        print(self.manager)
         self.train()
 
     def remove_noise(self, tweet_tokens, stop_words=()):
