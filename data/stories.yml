@@ -8,18 +8,18 @@ stories:
   - intent: greet
   - action: action_greet
   - slot_was_set:
-    - new_user: true
+    - new_user: 'true'
   - action: user_form
   - active_loop: user_form
   - active_loop: null
   - slot_was_set:
-     - permission_initial_test_user: true
+     - permission_initial_test_user: 'true'
   - action: utter_test_info
   - action: initial_test_form
   - active_loop: initial_test_form
   - active_loop: null
   - slot_was_set:
-     - movie_initial_test: true
+     - movie_initial_test: 'true'
   - action: utter_test_done
 
 - story: greet new user and do not do initial test
@@ -27,19 +27,19 @@ stories:
   - intent: greet
   - action: action_greet
   - slot_was_set:
-    - new_user: true
+    - new_user: 'true'
   - action: user_form
   - active_loop: user_form
   - active_loop: null
   - slot_was_set:
-     - permission_initial_test_user: false
+     - permission_initial_test_user: 'false'
   - action: utter_submit
 
 - story: recommend movie based on genre for existing user
   steps:
   - intent: recommend_movie
   - slot_was_set:
-    - new_user: false
+    - name_user: 'true'
   - action: movie_form
   - active_loop: movie_form
   - active_loop: null
@@ -48,7 +48,7 @@ stories:
   steps:
   - intent: recommend_movie
   - slot_was_set:
-    - name_user: false
+    - name_user: 'false'
   - action: action_greet
   - action: user_form
   - active_loop: user_form
@@ -66,7 +66,7 @@ stories:
   - intent: greet
   - action: action_greet
   - slot_was_set:
-    - new_user: false
+    - new_user: 'false'
 
 - story: name path
   steps:

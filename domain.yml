@@ -97,7 +97,7 @@ responses:
   utter_ask_permission_gender_user:
   - text: Do you want me to take your gender into account to recommend movies?
   utter_ask_gender_user:
-  - text: What is your gender? I'm non-binary. 
+  - text: What is your gender? 
   utter_ask_year_user:
   - text: Is the release year of a movie important to you?
   utter_ask_permission_initial_test_user:

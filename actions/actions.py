@@ -10,10 +10,13 @@ from rasa_sdk.types import DomainDict
 from rasa_sdk.executor import CollectingDispatcher
 from DataManagement.MoviesRecommender import MoviesManager
 from rasa_sdk.events import EventType
+
 import random
 import pickle5 as pickle
 
+
 from UserManagement.User import User
+from actions.extra_functions import get_gender, get_movie_sentence , get_trailer_url, default_responses, WAIT, MORE, ANOTHER
 
 
 import pandas as pd
@@ -45,8 +48,8 @@ class Greet(Action):
         manager = MoviesManager.getInstance()
         print(manager)
         if name_user is None:
-            dispatcher.utter_message(text=f"Hello stranger!")
-            dispatcher.utter_message(text=f"I'm the movie bot.")
+            dispatcher.utter_message(text=f"Hello stranger! 👋")
+            dispatcher.utter_message(text=f"I'm the movie bot. 🤖")
             return [SlotSet("new_user", "true")]
         else:
             dispatcher.utter_message(text=f"Hello {name_user}! Tell me, what can I do for you?")
@@ -166,19 +169,17 @@ class ValidateUserForm(FormValidationAction):
             dispatcher.utter_message(text=f"That's a very short response... I'm assuming you mis-spelled.")
 
         else:
-            entities = tracker.latest_message['entities']
-            for e in entities:
-                if str(e["entity"]) == "gender" and "value" in e:
-                    dispatcher.utter_message(text=f"Okay! Now I'll be able to provide more accurate results.")
-                    return {"permission_gender_user": "true", "gender_user": str(e["value"])}
+            gender, found = get_gender(slot_value)
+            if found:
+                return {"permission_gender_user": "true", "gender_user": str(gender)}
 
             sentiment =  tracker.latest_message['sentiment'][0]
             if str(sentiment["value"]) == "Positive":
                 return {"permission_gender_user": "true"}
             if str(sentiment["value"]) == "Negative":
-                return {"permission_gender_user": "false", "gender_user": "nonbinary"}
+                return {"permission_gender_user": "false", "gender_user": "0"}
 
-            return {"permission_gender_user": "false", "gender_user": "nonbinary"}
+            return {"permission_gender_user": "false", "gender_user": "0"}
 
     def validate_gender_user(
             self,
@@ -193,11 +194,9 @@ class ValidateUserForm(FormValidationAction):
             dispatcher.utter_message(text=f"Could you say that again? I'm assuming you mis-spelled.")
             return {"gender_user": None}
         else:
-            entities = tracker.latest_message['entities']
-            for e in entities:
-                if str(e["entity"]) == "gender" and "value" in e:
-                    dispatcher.utter_message(text=f"Okay! Now I'll be able to provide more accurate results.")
-                    return {"gender_user": str(e["value"])}
+            gender, found = get_gender(slot_value)
+            if found:
+                return {"gender_user": str(gender)}
 
             dispatcher.utter_message(text=f"I didn't catch that. Could you say that again?")
             return {"gender_user": None}
@@ -254,7 +253,7 @@ class ValidateUserForm(FormValidationAction):
 
         return {"permission_initial_test_user": "true"}
 
-    def validate_permission_year_user( 
+    def validate_year_user( 
             self,
             slot_value: Any,
             dispatcher: CollectingDispatcher,
@@ -265,12 +264,12 @@ class ValidateUserForm(FormValidationAction):
         entities =  tracker.latest_message['sentiment'][0]
 
         if str(entities["value"]) == "Positive":
-            return {"permission_year_user": "true"}
+            return {"year_user": "true"}
 
         elif str(entities["value"]) == "Negative":
-            return {"permission_year_user": "false"}
+            return {"year_user": "false"}
 
-        return {"permission_year_user": "true"}
+        return {"year_user": "true"}
 
 
 class ValidateInitialTestForm(FormValidationAction):
@@ -286,7 +285,7 @@ class ValidateInitialTestForm(FormValidationAction):
     ) -> Dict[Text, Any]:
 
         user = tracker.get_slot("user_data")
-        age = tracker.get_slot("age_user")
+        
         not_sure = tracker.get_slot("movie_not_sure")
         name_user = tracker.get_slot("name_user")
         last_movie = tracker.get_slot("last_movie")
@@ -294,6 +293,18 @@ class ValidateInitialTestForm(FormValidationAction):
         movies = tracker.latest_message['movies'][0]
         sentiment =  tracker.latest_message['sentiment'][0]
 
+        age = tracker.get_slot("age_user")
+        gender = tracker.get_slot("gender_user")
+        year = tracker.get_slot("year_user")
+
+        if year is None:
+            year = False
+            
+        if age is None:
+            age = 0
+
+        if gender is None:
+            gender = 0
 
         manager = MoviesManager.getInstance()
         print(manager)
@@ -336,7 +347,7 @@ class ValidateInitialTestForm(FormValidationAction):
                 user['not_care_list'].append(last_movie)
 
             if (len(user['like_list']) + len(user['unlike_list'])+ len(user['not_care_list']) ) < 6:
-                dispatcher.utter_message(text=f"Now, give me another movie")
+                dispatcher.utter_message(default_responses(MORE))
             else:
                 dispatcher.utter_message(text=f"Thanks {name_user}")
                 return {"movie_initial_test": "true", "user_data": user, "movie_not_sure" : "true",  "check_last_movie_intent" : "false", "last_movie" : ".."}
@@ -349,9 +360,11 @@ class ValidateInitialTestForm(FormValidationAction):
 
             if str(entities["value"]) == "Positive":
                 user['like_list'].append(not_sure)
-
-                score, result = manager.recommend(not_sure,  user['like_list'] ,user['unlike_list'],user['not_care_list'], int(age), gender=0)
+                dispatcher.utter_message(default_responses(WAIT))
+                score, result = manager.recommend(not_sure,  user['like_list'] ,user['unlike_list'],user['not_care_list'], age=int(age), gender=gender)
                 dispatcher.utter_message(text=f"based on this movie do you think you like {result.original_title.item()}?")
+                dispatcher.utter_message(text=f"Here is a link to the trailer: {get_trailer_url(result.original_title.item())}")
+                dispatcher.utter_message(text=f"Do you think you'll like this movie?")
                 return {"movie_initial_test": None , "user_data": user, "check_last_movie_intent" : "true", "last_movie" : result.original_title.item()}
             else: 
                 dispatcher.utter_message(text=f"Ohh ... Sorry then could you say the name again?")
@@ -369,11 +382,13 @@ class ValidateInitialTestForm(FormValidationAction):
             
             print(f"found = {found}")
             print(f"entry = {movie}")
-
-            dispatcher.utter_message(text=f"Yeah! {movie} is cool")
-
+            
+            dispatcher.utter_message(text=get_movie_sentence(movie))
+            dispatcher.utter_message(default_responses(WAIT))
             score, result = manager.recommend(movie,  user['like_list'] ,user['unlike_list'],user['not_care_list'], int(age), gender=0)
-            dispatcher.utter_message(text=f"based on this movie do you think you like {result.original_title.item()}?")
+            dispatcher.utter_message(text=f"I think you might like {result.original_title.item()}")
+            dispatcher.utter_message(text=f"Here is a link to the trailer: {get_trailer_url(result.original_title.item())}")
+            dispatcher.utter_message(text=f"Do you think you'll like this movie?")
             return {"movie_initial_test": None , "user_data": user, "check_last_movie_intent" : "true"  , "last_movie" : result.original_title.item()}
         
         else:
@@ -401,6 +416,17 @@ class ValidateMovieForm(FormValidationAction):
         
         user = tracker.get_slot("user_data")
         age = tracker.get_slot("age_user")
+        gender = tracker.get_slot("gender_user")
+        year = tracker.get_slot("year_user")
+
+        if year is None:
+            year = False
+            
+        if age is None:
+            age = 0
+
+        if gender is None:
+            gender = 0
 
         manager = MoviesManager.getInstance()
         print(manager)
@@ -432,22 +458,28 @@ class ValidateMovieForm(FormValidationAction):
         print("HELOOOO I'm here: ",found)
         if found:
             print(genre)
-            score, result = manager.recommend_from_user_list(user['like_list'] ,user['unlike_list'],user['not_care_list'], int(age), gender=0, genre=genre, time_important=True)
+            dispatcher.utter_message(default_responses(WAIT))
+            score, result = manager.recommend_from_user_list(user['like_list'] ,user['unlike_list'],user['not_care_list'], age=int(age), gender=int(gender), genre=genre, time_important=year)
             dispatcher.utter_message(text=f"I think you might like {result.original_title.item()}")
+            dispatcher.utter_message(text=f"Here is a link to the trailer: {get_trailer_url(result.original_title.item())}")
+            dispatcher.utter_message(text=f"Do you think you'll like this movie?")
             return {"permission_genre_movie": "true", "recommend_genre_movie" : genre, "check_last_movie_intent" : "true", "last_movie" : result.original_title.item(), "recommend_movie_movie": None}
 
         if str(entities["value"]) == "Positive":
             print( "what a lovely user!")
-            return {"permission_genre_movie": "true", "recommend_genre_movie" : None, "check_last_movie_intent" : None, "last_movie" : None}
+            return {"permission_genre_movie": "true", "recommend_genre_movie" : None, "recommend_movie_movie" : None, "check_last_movie_intent" : None, "last_movie" : None}
 
         elif str(entities["value"]) == "Negative":
             print("No genre given! rude...")
-            score, result = manager.recommend_from_user_list(user['like_list'] ,user['unlike_list'],user['not_care_list'], int(age), gender=0, genre=None, time_important=True)
+            dispatcher.utter_message(default_responses(WAIT))
+            score, result = manager.recommend_from_user_list(user['like_list'] ,user['unlike_list'],user['not_care_list'], age=int(age), gender=int(gender), genre=None, time_important=year)
             dispatcher.utter_message(text=f"I think you might like {result.original_title.item()}")
+            dispatcher.utter_message(text=f"Here is a link to the trailer: {get_trailer_url(result.original_title.item())}")
+            dispatcher.utter_message(text=f"Do you think you'll like this movie?")
             return {"permission_genre_movie": "false", "recommend_genre_movie" : "", "check_last_movie_intent" : "true", "last_movie" : result.original_title.item(), "recommend_movie_movie": None}
 
         
-        return {"permission_genre_movie": "true", "recommend_genre_movie" : None , "check_last_movie_intent" : None, "last_movie" : None}  
+        return {"permission_genre_movie": "true", "recommend_movie_movie" : None ,"recommend_genre_movie" : None , "check_last_movie_intent" : None, "last_movie" : None}  
  
 
     def validate_recommend_genre_movie(
@@ -465,6 +497,16 @@ class ValidateMovieForm(FormValidationAction):
 
         user = tracker.get_slot("user_data")
         age = tracker.get_slot("age_user")
+        year = tracker.get_slot("year_user")
+        if year is None:
+            year = False
+        gender = tracker.get_slot("gender_user")
+
+        if age is None:
+            age = 0
+
+        if gender is None:
+            gender = 0
 
         manager = MoviesManager.getInstance()
         if user is None:
@@ -494,8 +536,11 @@ class ValidateMovieForm(FormValidationAction):
 
         if found:
             print(genre)
-            score, result = manager.recommend_from_user_list(user['like_list'] ,user['unlike_list'],user['not_care_list'], int(age), gender=0, genre=genre, time_important=True)
+            dispatcher.utter_message(default_responses(WAIT))
+            score, result = manager.recommend_from_user_list(user['like_list'] ,user['unlike_list'],user['not_care_list'], age=int(age), gender=int(gender), genre=genre, time_important=year)
             dispatcher.utter_message(text=f"I think you might like {result.original_title.item()}")
+            dispatcher.utter_message(text=f"Here is a link to the trailer: {get_trailer_url(result.original_title.item())}")
+            dispatcher.utter_message(text=f"Do you think you'll like this movie?")
             return {"recommend_genre_movie" : genre, "check_last_movie_intent" : "true", "last_movie" : result.original_title.item(), "recommend_movie_movie": None}
 
         else:
@@ -512,6 +557,15 @@ class ValidateMovieForm(FormValidationAction):
         
         user = tracker.get_slot("user_data")
         age = tracker.get_slot("age_user")
+        gender = tracker.get_slot("gender_user")
+        year = tracker.get_slot("year_user")
+        if year is None:
+            year = False
+        if age is None:
+            age = 0
+
+        if gender is None:
+            gender = 0
         last_movie = tracker.get_slot("last_movie")
         genre = tracker.get_slot("recommend_genre_movie")
         if genre == "":
@@ -550,18 +604,23 @@ class ValidateMovieForm(FormValidationAction):
 
         if str(sentiment["value"]) == "Positive":                    
             user['like_list'].append(last_movie)
-            dispatcher.utter_message(text=f"I am glad to hear that you  like this movie!")
-            return {"recommend_movie_movie" : "true"}
+            dispatcher.utter_message(text=f"I am glad to hear that you like this movie! 😄")
+            return {"recommend_movie_movie" : "true", "recommend_genre_movie": None, "permission_genre_movie": None}
         elif str(sentiment["value"]) == "Negative":
             user['unlike_list'].append(last_movie)
-            dispatcher.utter_message(text=f"Let me find another movie...")
-            score, result = manager.recommend_from_user_list(user['like_list'] ,user['unlike_list'],user['not_care_list'], int(age), gender=0, genre=genre, time_important=True)
-            dispatcher.utter_message(text=f"I think you might like {result.original_title.item()}")
+            dispatcher.utter_message(default_responses(ANOTHER))
+            score, result = manager.recommend_from_user_list(user['like_list'] ,user['unlike_list'],user['not_care_list'], age=int(age), gender=int(gender), genre=genre, time_important=year)
+            dispatcher.utter_message(text=f"Would you be interested in {result.original_title.item()}")
+            dispatcher.utter_message(text=f"Here is a link to the trailer: {get_trailer_url(result.original_title.item())}")
+            dispatcher.utter_message(text=f"Do you think you'll like this movie?")
             return {"check_last_movie_intent" : None, "last_movie" :  result.original_title.item(), "recommend_movie_movie" : None}
         else:
             user['not_care_list'].append(last_movie)
-            dispatcher.utter_message(text=f"Okay! let me look for another one!")
-            score, result = manager.recommend_from_user_list(user['like_list'] ,user['unlike_list'],user['not_care_list'], int(age), gender=0, genre=genre, time_important=True)
-            dispatcher.utter_message(text=f"I think you might like {result.original_title.item()}")
+            
+            dispatcher.utter_message(default_responses(ANOTHER))
+            score, result = manager.recommend_from_user_list(user['like_list'] ,user['unlike_list'],user['not_care_list'], age=int(age), gender=int(gender), genre=genre, time_important=year)
+            dispatcher.utter_message(text=f"Would you be interested in {result.original_title.item()}")
+            dispatcher.utter_message(text=f"Here is a link to the trailer: {get_trailer_url(result.original_title.item())}")
+            dispatcher.utter_message(text=f"Do you think you'll like this movie?")
             return {"check_last_movie_intent" : None, "last_movie" :  result.original_title.item(), "recommend_movie_movie" : None}
 
