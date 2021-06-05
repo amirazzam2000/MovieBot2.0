@@ -37,6 +37,7 @@ nlu:
     - of course
     - that sounds good
     - correct
+    - yes Action
 - intent: deny
   examples: |
     - no
@@ -94,16 +95,16 @@ nlu:
     - Recommend me a movie
     - What movie should I watch?
     - I want to watch a movie
-    - What movie should I watch?
     - I don't know what to watch
     - Help me out
-    - Can you help me find a movie to watch? 
-    - What movie should I watch next? 
+    - Can you help me find a movie to watch?
+    - What movie should I watch next?
     - Movie recommendation
     - Recommend
     - Movie
     - movie
     - recommend
+    - recommend a movie
 - intent: years_old
   examples: |
     - I'm [30](age) years old
@@ -129,6 +130,11 @@ nlu:
     - I identify as [female](gender)
     - I identify as [male](gender)
     - I identify as [non-binary](gender)
+- intent: nlu_fallback
+  examples: |
+    - The Avengers
+    - love, simon
+    - The Imitation Game
 - lookup: gender
   examples: |
     - female

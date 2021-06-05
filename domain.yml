@@ -3,26 +3,25 @@ session_config:
   session_expiration_time: 240
   carry_over_slots_to_new_session: true
 intents:
-- goodbye
 - affirm
-- nlu_fallback
-- greet
+- recommend_movie
 - deny
+- nlu_fallback
+- goodbye
+- greet
 - request_names
 - mood_great
 - mood_unhappy
 - bot_challenge
 - repeat_name
-- recommend_movie
 - get_gender
 - years_old
-
 entities:
-  - PERSON
-  - CARDINAL
-  - gender
-  - age
-  - sentiment
+- CARDINAL
+- PERSON
+- age
+- gender
+- sentiment
 slots:
   name_user:
     type: text
@@ -32,6 +31,9 @@ slots:
     influence_conversation: false
   gender_user:
     type: text
+    influence_conversation: false
+  year_user:
+    type: bool
     influence_conversation: false
   new_user:
     type: bool
@@ -63,31 +65,15 @@ slots:
   user_data:
     type: any
     influence_conversation: false
-  recommend_genre:
+  permission_genre_movie:
     type: text
     influence_conversation: false
-
-forms:
-  user_form:
-    required_slots:
-      permission_name_user:
-      - type: from_text
-      name_user:
-      - type: from_text
-      permission_age_user:
-      - type: from_text
-      age_user:
-      - type: from_text
-      permission_gender_user:
-      - type: from_text
-      gender_user:
-      - type: from_text
-      permission_initial_test_user:
-      - type: from_text
-  initial_test_form:
-    required_slots:
-      movie_initial_test:
-        - type: from_text
+  recommend_genre_movie:
+    type: text
+    influence_conversation: false
+  recommend_movie_movie:
+    type: text
+    influence_conversation: false
 responses:
   utter_cheer_up:
   - text: 'Here is something to cheer you up:'
@@ -111,37 +97,67 @@ responses:
   utter_ask_permission_gender_user:
   - text: Do you want me to take your gender into account to recommend movies?
   utter_ask_gender_user:
-  - text: What is your gender? I'm non-binary.
+  - text: What is your gender? I'm non-binary. 
+  utter_ask_year_user:
+  - text: Is the release year of a movie important to you?
   utter_ask_permission_initial_test_user:
-  - text: >
-          To customize the recommendations I need to know more about your movie taste.
-          Can I ask you a few questions? It will take a couple minutes.
+  - text: |
+      To customize the recommendations I need to know more about your movie taste. Can I ask you a few questions? It will take a couple minutes.
   utter_submit:
   - text: Ok. Thanks {name_user}!
   utter_test_info:
-  - text: > 
-      Great!
-      This test is very simple. I'll ask for the name of 3 movies you like.
-      Try to choose them from different genres as then I would be able to recommend more costumised movies.
-      Let's get started with the first one.
-      Tell me the name of a movie you like.
-  action_recommend_genre:
+  - text: |
+      Great! This test is very simple. I'll ask for the name of 3 movies you like. Try to choose them from different genres as then I would be able to recommend more costumised movies. Let's get started with the first one. Tell me the name of a movie you like.
+  utter_ask_permission_genre_movie:
   - text: Would you like to watch a movie from a specific genre?
+  utter_ask_recommend_genre_movie:
+  - text: What genre?
   utter_test_done:
-  - text: > 
-      Now you can ask me to recommend movies or you can tell me more movies you like or dislike to prove an even more customizable recomendations 😊
-
-
+  - text: |
+      Now you can ask me to recommend movies or you can tell me more movies you like or dislike to provide an even more customizable recomendations 😊
 actions:
 - action_bot_favourite_movie
 - action_greet
 - action_receive_name
-- action_say_name
 - action_recommend_genre
+- action_say_name
+- utter_cheer_up
 - utter_greet
 - utter_slots_values
 - utter_submit
-- utter_test_info
 - utter_test_done
-- validate_user_form
+- utter_test_info
 - validate_initial_test_form
+- validate_movie_form
+- validate_user_form
+forms:
+  user_form: 
+    required_slots:
+      permission_name_user:
+      - type: from_text
+      name_user:
+      - type: from_text
+      permission_age_user:
+      - type: from_text
+      age_user:
+      - type: from_text
+      permission_gender_user:
+      - type: from_text
+      gender_user:
+      - type: from_text
+      year_user:
+      - type: from_text
+      permission_initial_test_user:
+      - type: from_text
+  initial_test_form:
+    required_slots:
+      movie_initial_test:
+      - type: from_text
+  movie_form:
+    required_slots:
+      permission_genre_movie:
+      - type: from_text
+      recommend_genre_movie:
+      - type: from_text
+      recommend_movie_movie:
+      - type: from_text

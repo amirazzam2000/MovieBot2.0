@@ -1,4 +1,3 @@
-
 import json
 from typing import Any, Text, Dict, List
 
@@ -80,12 +79,14 @@ class RecommendGenre(Action):
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
 
         name = tracker.get_slot("recommend_genre")
-
+        
         sentiment =  tracker.latest_message['sentiment'][0]
         if str(sentiment["value"]) == "Positive":
-                return {"recommend_genre": name}
+                print("I'm positive")
+                return [SlotSet("recommend_genre",name)]
         else:
-                return {"recommend_genre": ""}
+                print("I'm negative")
+                return [SlotSet("recommend_genre","")]
 
 
 class ValidateUserForm(FormValidationAction):
@@ -235,7 +236,7 @@ class ValidateUserForm(FormValidationAction):
         dispatcher.utter_message(text=f"I didn't catch your age. Could you say it again?")
         return {"age_user": None}
 
-    def validate_permission_initial_test_user(
+    def validate_permission_initial_test_user( 
             self,
             slot_value: Any,
             dispatcher: CollectingDispatcher,
@@ -252,6 +253,24 @@ class ValidateUserForm(FormValidationAction):
             return {"permission_initial_test_user": "false"}
 
         return {"permission_initial_test_user": "true"}
+
+    def validate_permission_year_user( 
+            self,
+            slot_value: Any,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: DomainDict,
+    ) -> Dict[Text, Any]:
+
+        entities =  tracker.latest_message['sentiment'][0]
+
+        if str(entities["value"]) == "Positive":
+            return {"permission_year_user": "true"}
+
+        elif str(entities["value"]) == "Negative":
+            return {"permission_year_user": "false"}
+
+        return {"permission_year_user": "true"}
 
 
 class ValidateInitialTestForm(FormValidationAction):
@@ -317,7 +336,7 @@ class ValidateInitialTestForm(FormValidationAction):
                 user['not_care_list'].append(last_movie)
 
             if (len(user['like_list']) + len(user['unlike_list'])+ len(user['not_care_list']) ) < 6:
-                dispatcher.utter_message(text=f"Could you give me another movie?")
+                dispatcher.utter_message(text=f"Now, give me another movie")
             else:
                 dispatcher.utter_message(text=f"Thanks {name_user}")
                 return {"movie_initial_test": "true", "user_data": user, "movie_not_sure" : "true",  "check_last_movie_intent" : "false", "last_movie" : ".."}
@@ -360,4 +379,189 @@ class ValidateInitialTestForm(FormValidationAction):
         else:
             dispatcher.utter_message(text=f"you are reffering to \"{movie}\", right?")
             return {"movie_initial_test": None , "movie_not_sure": movie, "user_data": user, "last_movie" : None, "check_last_movie_intent" : None }
+
+
+
+class ValidateMovieForm(FormValidationAction):
+    def name(self) -> Text:
+        return "validate_movie_form"
+
+    def validate_permission_genre_movie(
+            self,
+            slot_value: Any,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        
+        entities =  tracker.latest_message['sentiment'][0]
+        genres =  tracker.latest_message['genres'][0]
+        found = genres["found"]
+        genre = genres["name"]
+        
+        user = tracker.get_slot("user_data")
+        age = tracker.get_slot("age_user")
+
+        manager = MoviesManager.getInstance()
+        print(manager)
+        if user is None:
+            user = dict()
+            user['like_list'] = ['The Avengers']
+            user['unlike_list'] = ['The Shining']
+            user['not_care_list'] = ['12 Angry Men']
+            print("setting a value!!")
+        else:
+            print("already set!")
+
+        print("like:")
+        if user['like_list'] is not None:
+            for m in user['like_list']:
+                print(m)
+        print()
+        print("unlike:")
+        if user['unlike_list'] is not None:
+            for m in user['unlike_list']:
+                print(m)
+        print()
+        print("not care:")
+        if user['not_care_list'] is not None:
+            for m in user['not_care_list']:
+                print(m)
+        print()
+
+        print("HELOOOO I'm here: ",found)
+        if found:
+            print(genre)
+            score, result = manager.recommend_from_user_list(user['like_list'] ,user['unlike_list'],user['not_care_list'], int(age), gender=0, genre=genre, time_important=True)
+            dispatcher.utter_message(text=f"I think you might like {result.original_title.item()}")
+            return {"permission_genre_movie": "true", "recommend_genre_movie" : genre, "check_last_movie_intent" : "true", "last_movie" : result.original_title.item(), "recommend_movie_movie": None}
+
+        if str(entities["value"]) == "Positive":
+            print( "what a lovely user!")
+            return {"permission_genre_movie": "true", "recommend_genre_movie" : None, "check_last_movie_intent" : None, "last_movie" : None}
+
+        elif str(entities["value"]) == "Negative":
+            print("No genre given! rude...")
+            score, result = manager.recommend_from_user_list(user['like_list'] ,user['unlike_list'],user['not_care_list'], int(age), gender=0, genre=None, time_important=True)
+            dispatcher.utter_message(text=f"I think you might like {result.original_title.item()}")
+            return {"permission_genre_movie": "false", "recommend_genre_movie" : "", "check_last_movie_intent" : "true", "last_movie" : result.original_title.item(), "recommend_movie_movie": None}
+
+        
+        return {"permission_genre_movie": "true", "recommend_genre_movie" : None , "check_last_movie_intent" : None, "last_movie" : None}  
+ 
+
+    def validate_recommend_genre_movie(
+            self,
+            slot_value: Any,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: DomainDict,
+    ) -> Dict[Text, Any]:
+    
+        genres =  tracker.latest_message['genres'][0]
+        movies = tracker.latest_message['movies'][0]
+        found = genres["found"]
+        genre = genres["name"]
+
+        user = tracker.get_slot("user_data")
+        age = tracker.get_slot("age_user")
+
+        manager = MoviesManager.getInstance()
+        if user is None:
+            user = dict()
+            user['like_list'] = ['The Avengers']
+            user['unlike_list'] = ['The Shining']
+            user['not_care_list'] = ['12 Angry Men']
+            print("setting a value!!")
+        else:
+            print("already set!")
+
+        print("like:")
+        if user['like_list'] is not None:
+            for m in user['like_list']:
+                print(m)
+        print()
+        print("unlike:")
+        if user['unlike_list'] is not None:
+            for m in user['unlike_list']:
+                print(m)
+        print()
+        print("not care:")
+        if user['not_care_list'] is not None:
+            for m in user['not_care_list']:
+                print(m)
+        print()
+
+        if found:
+            print(genre)
+            score, result = manager.recommend_from_user_list(user['like_list'] ,user['unlike_list'],user['not_care_list'], int(age), gender=0, genre=genre, time_important=True)
+            dispatcher.utter_message(text=f"I think you might like {result.original_title.item()}")
+            return {"recommend_genre_movie" : genre, "check_last_movie_intent" : "true", "last_movie" : result.original_title.item(), "recommend_movie_movie": None}
+
+        else:
+            return {"recommend_genre_movie": None, "check_last_movie_intent" : None, "last_movie" : None}
+        
+        
+    def validate_recommend_movie_movie(  
+            self,
+            slot_value: Any,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: DomainDict,
+    ) -> Dict[Text, Any]:   
+        
+        user = tracker.get_slot("user_data")
+        age = tracker.get_slot("age_user")
+        last_movie = tracker.get_slot("last_movie")
+        genre = tracker.get_slot("recommend_genre_movie")
+        if genre == "":
+            genre = None
+        check_last_movie_intent = tracker.get_slot("check_last_movie_intent")
+        sentiment =  tracker.latest_message['sentiment'][0]
+
+
+        manager = MoviesManager.getInstance()
+        print(manager)
+        if user is None:
+            user = dict()
+            user['like_list'] = ['The Avengers']
+            user['unlike_list'] = ['The Shining']
+            user['not_care_list'] = ['12 Angry Men']
+            print("setting a value!!")
+        else:
+            print("already set!")
+
+        print("like:")
+        if user['like_list'] is not None:
+            for m in user['like_list']:
+                print(m)
+        print()
+        print("unlike:")
+        if user['unlike_list'] is not None:
+            for m in user['unlike_list']:
+                print(m)
+        print()
+        print("not care:")
+        if user['not_care_list'] is not None:
+            for m in user['not_care_list']:
+                print(m)
+        print()
+
+
+        if str(sentiment["value"]) == "Positive":                    
+            user['like_list'].append(last_movie)
+            dispatcher.utter_message(text=f"I am glad to hear that you  like this movie!")
+            return {"recommend_movie_movie" : "true"}
+        elif str(sentiment["value"]) == "Negative":
+            user['unlike_list'].append(last_movie)
+            dispatcher.utter_message(text=f"Let me find another movie...")
+            score, result = manager.recommend_from_user_list(user['like_list'] ,user['unlike_list'],user['not_care_list'], int(age), gender=0, genre=genre, time_important=True)
+            dispatcher.utter_message(text=f"I think you might like {result.original_title.item()}")
+            return {"check_last_movie_intent" : None, "last_movie" :  result.original_title.item(), "recommend_movie_movie" : None}
+        else:
+            user['not_care_list'].append(last_movie)
+            dispatcher.utter_message(text=f"Okay! let me look for another one!")
+            score, result = manager.recommend_from_user_list(user['like_list'] ,user['unlike_list'],user['not_care_list'], int(age), gender=0, genre=genre, time_important=True)
+            dispatcher.utter_message(text=f"I think you might like {result.original_title.item()}")
+            return {"check_last_movie_intent" : None, "last_movie" :  result.original_title.item(), "recommend_movie_movie" : None}
 

@@ -130,12 +130,12 @@ class SentimentAnalyzer(Component):
 
         return entity
 
-    def convert_movie_to_rasa(self, value, found):
+    def convert_movie_to_rasa(self, value, found, entity = "movie_name"):
         """Convert model output into the Rasa NLU compatible output format."""
 
         entity = {"name": value,
                   "found": found,
-                  "entity": "movie_name",
+                  "entity": entity,
                   "extractor": "our_fuzzy_logic"}
 
         return entity
@@ -171,6 +171,10 @@ class SentimentAnalyzer(Component):
 
             found, entry = self.manager.getMovieName(message.get("text"))
             movie = str(entry['original_title'].item())
+            
+            genre_entry, aux_found_genre = self.manager.fuzzy_find_genre(message.get("text"), with_ratio=True)[0]
+            genre = genre_entry
+            
 
             if len(message.get("text")) > 20:
                 entity = self.convert_to_rasa(sentiment, confidence, name="our_sentiment_extractor")
@@ -178,8 +182,19 @@ class SentimentAnalyzer(Component):
                 entity = self.convert_to_rasa(key, value, name="builtin_sentiment_extractor")
 
             message.set("sentiment", [entity], add_to_output=True)
+
             entity = self.convert_movie_to_rasa(movie, found)
             message.set("movies", [entity], add_to_output=True)
+
+            if message.get("text").strip() == "no":
+                found_genre = False
+            else:
+                found_genre = True if aux_found_genre > 80 else False
+
+            entity = self.convert_movie_to_rasa(genre, found_genre, entity="genres_detected")
+            print(entity)
+            message.set("genres", [entity], add_to_output=True)
+
 
     def persist(self, file_name, model_dir):
         """Persist this model into the passed directory

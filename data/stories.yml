@@ -35,22 +35,31 @@ stories:
      - permission_initial_test_user: false
   - action: utter_submit
 
-- story: recommend movie based on genre
+- story: recommend movie based on genre for existing user
   steps:
   - intent: recommend_movie
-  - action: action_recommend_genre
   - slot_was_set:
-    - recommend_genre: true
-  - action: utter_goodbye
+    - new_user: false
+  - action: movie_form
+  - active_loop: movie_form
+  - active_loop: null
 
-- story: recommend movie NOT based on genre
+- story: recommend movie based on genre for new user
   steps:
   - intent: recommend_movie
-  - action: recommend_genre
   - slot_was_set:
-    - recommend_genre: false
-  - action: utter_happy
-
+    - name_user: false
+  - action: action_greet
+  - action: user_form
+  - active_loop: user_form
+  - active_loop: null
+  - action: utter_test_info
+  - action: initial_test_form
+  - active_loop: initial_test_form
+  - active_loop: null
+  - action: movie_form
+  - active_loop: movie_form
+  - active_loop: null
 
 - story: greet existing user
   steps:
@@ -64,3 +73,165 @@ stories:
   - intent: repeat_name
   - action: action_say_name
 
+
+- story: interactive_story_1
+  steps:
+  - intent: recommend_movie
+  - action: action_greet
+  - slot_was_set:
+    - new_user: 'true'
+  - action: user_form
+  - active_loop: user_form
+  - slot_was_set:
+    - requested_slot: permission_name_user
+  - slot_was_set:
+    - permission_name_user: 'false'
+  - slot_was_set:
+    - name_user: user694
+  - slot_was_set:
+    - requested_slot: permission_age_user
+  - slot_was_set:
+    - permission_age_user: 'false'
+  - slot_was_set:
+    - age_user: '0'
+  - slot_was_set:
+    - requested_slot: permission_gender_user
+  - slot_was_set:
+    - permission_gender_user: 'false'
+  - slot_was_set:
+    - gender_user: nonbinary
+  - slot_was_set:
+    - requested_slot: permission_initial_test_user
+  - slot_was_set:
+    - permission_initial_test_user: 'true'
+  - slot_was_set:
+    - requested_slot: null
+  - active_loop: null
+  - action: utter_test_info
+  - action: initial_test_form
+  - active_loop: initial_test_form
+  - slot_was_set:
+    - requested_slot: movie_initial_test
+  - slot_was_set:
+    - movie_initial_test: null
+  - slot_was_set:
+    - user_data:
+        like_list:
+        - The Avengers
+        unlike_list: []
+        not_care_list: []
+  - slot_was_set:
+    - check_last_movie_intent: 'true'
+  - slot_was_set:
+    - last_movie: 'Avengers: Age of Ultron'
+  - slot_was_set:
+    - requested_slot: movie_initial_test
+  - slot_was_set:
+    - movie_initial_test: null
+  - slot_was_set:
+    - user_data:
+        like_list:
+        - The Avengers
+        - 'Avengers: Age of Ultron'
+        unlike_list: []
+        not_care_list: []
+  - slot_was_set:
+    - check_last_movie_intent: null
+  - slot_was_set:
+    - movie_not_sure: null
+  - slot_was_set:
+    - requested_slot: movie_initial_test
+  - slot_was_set:
+    - movie_initial_test: null
+  - slot_was_set:
+    - user_data:
+        like_list:
+        - The Avengers
+        - 'Avengers: Age of Ultron'
+        - Love, Simon
+        unlike_list: []
+        not_care_list: []
+  - slot_was_set:
+    - check_last_movie_intent: 'true'
+  - slot_was_set:
+    - last_movie: Sierra Burgess Is a Loser
+  - slot_was_set:
+    - requested_slot: movie_initial_test
+  - slot_was_set:
+    - movie_initial_test: null
+  - slot_was_set:
+    - user_data:
+        like_list:
+        - The Avengers
+        - 'Avengers: Age of Ultron'
+        - Love, Simon
+        - Sierra Burgess Is a Loser
+        unlike_list: []
+        not_care_list: []
+  - slot_was_set:
+    - check_last_movie_intent: null
+  - slot_was_set:
+    - movie_not_sure: null
+  - slot_was_set:
+    - requested_slot: movie_initial_test
+  - slot_was_set:
+    - movie_initial_test: null
+  - slot_was_set:
+    - user_data:
+        like_list:
+        - The Avengers
+        - 'Avengers: Age of Ultron'
+        - Love, Simon
+        - Sierra Burgess Is a Loser
+        - The Imitation Game
+        unlike_list: []
+        not_care_list: []
+  - slot_was_set:
+    - check_last_movie_intent: 'true'
+  - slot_was_set:
+    - last_movie: Hacksaw Ridge
+  - slot_was_set:
+    - requested_slot: movie_initial_test
+  - slot_was_set:
+    - movie_initial_test: 'true'
+  - slot_was_set:
+    - user_data:
+        like_list:
+        - The Avengers
+        - 'Avengers: Age of Ultron'
+        - Love, Simon
+        - Sierra Burgess Is a Loser
+        - The Imitation Game
+        unlike_list:
+        - Hacksaw Ridge
+        not_care_list: []
+  - slot_was_set:
+    - movie_not_sure: 'true'
+  - slot_was_set:
+    - check_last_movie_intent: 'false'
+  - slot_was_set:
+    - last_movie: ..
+  - slot_was_set:
+    - requested_slot: null
+  - active_loop: null
+  - action: movie_form
+  - active_loop: movie_form
+  - slot_was_set:
+    - requested_slot: permission_genre_movie
+  - slot_was_set:
+    - permission_genre_movie: 'true'
+  - slot_was_set:
+    - recommend_genre_movie: Action
+  - slot_was_set:
+    - check_last_movie_intent: 'true'
+  - slot_was_set:
+    - last_movie: Senior Project
+  - slot_was_set:
+    - recommend_movie_movie: null
+  - slot_was_set:
+    - requested_slot: recommend_movie_movie
+  - slot_was_set:
+    - recommend_movie_movie: 'true'
+  - slot_was_set:
+    - requested_slot: null
+  - active_loop: null

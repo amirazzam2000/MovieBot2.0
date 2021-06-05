@@ -109,9 +109,13 @@ class MoviesManager():
         else:
             return [x[0] for x in Ratios]
 
-    def fuzzy_find_genre(self, genre):
-        highest = process.extractOne(genre, self.genres_loaded)
-        return highest[0]
+    def fuzzy_find_genre(self, genre, with_ratio=False):
+        Ratios = process.extract(genre, self.genres_loaded)
+        if with_ratio:
+            return Ratios
+        else:
+            return [x[0] for x in Ratios]
+
 
     def find_similar_based_on_plot(self, title):
 
@@ -276,7 +280,12 @@ class MoviesManager():
         recommend_score = 0
         aux = 0
         the_list = []
-        genre = self.fuzzy_find_genre(genre)
+        if genre is not None and (len(genre) >= 1 and genre[0] != ""):
+            #genre = self.fuzzy_find_genre(genre)
+            print("found your genre!! ", genre)
+        else: 
+            genre = None
+            print("genre is none!")
         movie_to_recommend = None
         portion = 0.05 / len(user_movie_list)
         for movie in user_movie_list:
@@ -292,7 +301,7 @@ class MoviesManager():
                 looked_at.append(m)
                 found, name = self.getMovieName(m[2])
 
-                if (genre is not None and genre not in name.genre.values[0]):
+                if (genre is not None and genre not in name.genre.values[0] ):
                     continue
                 if (user_movie_list is not None and (name.original_title.item() in user_movie_list)):
                     continue
