@@ -416,24 +416,6 @@ class ValidateUserForm(FormValidationAction):
         dispatcher.utter_message(text=f"I didn't catch your age. Could you say it again?")
         return {"age_user": None}
 
-    def validate_permission_initial_test_user(
-            self,
-            slot_value: Any,
-            dispatcher: CollectingDispatcher,
-            tracker: Tracker,
-            domain: DomainDict,
-    ) -> Dict[Text, Any]:
-
-        entities = tracker.latest_message['sentiment'][0]
-
-        if str(entities["value"]) == "Positive":
-            return {"permission_initial_test_user": "true"}
-
-        elif str(entities["value"]) == "Negative":
-            return {"permission_initial_test_user": "false"}
-
-        return {"permission_initial_test_user": "true"}
-
     def validate_year_user(
             self,
             slot_value: Any,

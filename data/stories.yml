@@ -12,8 +12,6 @@ stories:
   - action: user_form
   - active_loop: user_form
   - active_loop: null
-  - slot_was_set:
-     - permission_initial_test_user: 'true'
   - action: utter_test_info
   - action: initial_test_form
   - active_loop: initial_test_form
@@ -23,19 +21,6 @@ stories:
   - action: utter_test_done
   - action: action_reset_param
 
-- story: greet new user and do not do initial test
-  steps:
-  - intent: greet
-  - action: action_greet
-  - slot_was_set:
-    - new_user: 'true'
-  - action: user_form
-  - active_loop: user_form
-  - active_loop: null
-  - slot_was_set:
-     - permission_initial_test_user: 'false'
-  - action: utter_submit
-  - action: action_reset_param
 
 - story: recommend movie based on genre for existing user
   steps:

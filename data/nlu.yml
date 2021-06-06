@@ -171,14 +171,6 @@ nlu:
     - I identify as [female](gender)
     - I identify as [male](gender)
     - I identify as [non-binary](gender)
-- intent: nlu_fallback
-  examples: |
-    - The Avengers
-    - love, simon
-    - The Imitation Game
-    - sure
-    - The Imitation gam
-    - Call me by your name
 - lookup: gender
   examples: |
     - female

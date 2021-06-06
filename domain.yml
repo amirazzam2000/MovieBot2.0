@@ -51,9 +51,6 @@ slots:
   permission_gender_user:
     type: bool
     influence_conversation: false
-  permission_initial_test_user:
-    type: bool
-    influence_conversation: true
   movie_initial_test:
     type: text
     influence_conversation: true
@@ -91,6 +88,8 @@ slots:
     type: text
     influence_conversation: false
 responses:
+  utter_please_rephrase:
+    - text: Could you say that again? I didn't understand what you said
   utter_cheer_up:
   - text: 'Here is something to cheer you up:'
     image: https://i.imgur.com/nGF1K8f.jpg
@@ -116,9 +115,6 @@ responses:
   - text: What is your gender?
   utter_ask_year_user:
   - text: Is the release year of a movie important to you?
-  utter_ask_permission_initial_test_user:
-  - text: |
-      To customize the recommendations I need to know more about your movie taste. Can I ask you a few questions? It will take a couple minutes.
   utter_submit:
   - text: Ok. Thanks {name_user}!
   utter_test_info:
@@ -170,8 +166,6 @@ forms:
       gender_user:
       - type: from_text
       year_user:
-      - type: from_text
-      permission_initial_test_user:
       - type: from_text
   initial_test_form:
     required_slots:
