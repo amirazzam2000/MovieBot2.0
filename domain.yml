@@ -16,6 +16,7 @@ intents:
 - repeat_name
 - get_gender
 - years_old
+- add_movie
 entities:
 - CARDINAL
 - PERSON
@@ -74,6 +75,18 @@ slots:
   recommend_movie_movie:
     type: text
     influence_conversation: false
+  add_movie:
+    type: text
+    influence_conversation: false
+  verify_movie:
+    type: bool
+    influence_conversation: false
+  another_movie:
+    type: text
+    influence_conversation: false
+
+
+
 responses:
   utter_cheer_up:
   - text: 'Here is something to cheer you up:'
@@ -112,6 +125,10 @@ responses:
   - text: Would you like to watch a movie from a specific genre?
   utter_ask_recommend_genre_movie:
   - text: What genre?
+  utter_ask_add_movie:
+    - text: What movie would like like to add? Tell me if you liked it or not
+  utter_ask_another_movie:
+    - text: Would you like to add another movie?
   utter_test_done:
   - text: |
       Now you can ask me to recommend movies or you can tell me more movies you like or dislike to provide an even more customizable recomendations 😊
@@ -130,6 +147,7 @@ actions:
 - validate_initial_test_form
 - validate_movie_form
 - validate_user_form
+- validate_add_form
 forms:
   user_form: 
     required_slots:
@@ -161,3 +179,11 @@ forms:
       - type: from_text
       recommend_movie_movie:
       - type: from_text
+  add_form:
+    required_slots:
+      add_movie:
+        - type: from_text
+      verify_movie:
+        - type: from_text
+      another_movie:
+        - type: from_text

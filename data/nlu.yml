@@ -90,6 +90,11 @@ nlu:
     - what is my name?
     - what's my name?
     - do you know my name?
+- intent: add_movie
+  examples: |
+    - add movie
+    - I like a movie
+    - I don't like a movie
 - intent: recommend_movie
   examples: |
     - Recommend me a movie

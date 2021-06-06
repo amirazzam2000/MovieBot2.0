@@ -73,6 +73,12 @@ stories:
   - intent: repeat_name
   - action: action_say_name
 
+- story: add movie
+  steps:
+  - intent: add_movie
+  - action: add_form
+  - active_loop: add_form
+  - active_loop: null
 
 - story: interactive_story_1
   steps:
