@@ -38,6 +38,7 @@ nlu:
     - that sounds good
     - correct
     - yes Action
+    - ye
 - intent: deny
   examples: |
     - no
@@ -47,6 +48,7 @@ nlu:
     - don't like that
     - no way
     - not really
+    - nope
 - intent: mood_great
   examples: |
     - perfect
@@ -63,6 +65,7 @@ nlu:
     - so so perfect
     - so good
     - so perfect
+    - Beauty and The Beast
 - intent: mood_unhappy
   examples: |
     - my day was horrible
@@ -93,8 +96,29 @@ nlu:
 - intent: add_movie
   examples: |
     - add movie
+    - add a movie I like
+    - I want to add a movie I like
+    - I want to add a movie I hate
+    - I want to add a movie I don't like
+    - I want to add a movie I do not like
+    - I just remembered a movie I like
+    - I just remembered a movie I don't like
+    - I just remembered a movie I do not like
     - I like a movie
+    - I like the movie (cars)[movie]
+    - I like the movie (beauty and the beast)[movie]
+    - I like the movie (The avengers)[movie]
+    - I like the movie (the imitation game)[movie]
+    - I like the movie (movie name)[movie]
+    - I like the movie (the secret life of bets)[movie]
+    - I don't like the movie (cars)[movie]
+    - I do not like the movie (beauty and the beast)[movie]
+    - I don't like the movie (The avengers)[movie]
+    - I do not like the movie (the imitation game)[movie]
+    - I do not like the movie (the secret life of bets)[movie]
+    - I don't like the movie (movie name)[movie]
     - I don't like a movie
+    - I also like a movie called Call me by your name
 - intent: recommend_movie
   examples: |
     - Recommend me a movie
@@ -107,20 +131,21 @@ nlu:
     - Movie recommendation
     - recommend another movie
     - recommend another one
-    - do it one more time 
-    - give me another movie 
+    - do it one more time
+    - give me another movie
     - again
-    - give me another one 
-    - give 
+    - give me another one
+    - give
     - find a movie
     - repeat
-    - one more time 
+    - one more time
     - last time I promise
     - Recommend
     - Movie
     - movie
     - recommend
     - recommend a movie
+    - recommecd a movie
 - intent: years_old
   examples: |
     - I'm [30](age) years old
@@ -151,6 +176,9 @@ nlu:
     - The Avengers
     - love, simon
     - The Imitation Game
+    - sure
+    - The Imitation gam
+    - Call me by your name
 - lookup: gender
   examples: |
     - female

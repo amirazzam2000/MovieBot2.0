@@ -33,6 +33,22 @@ class BotFavouriteMovie(Action):
 
         return []
 
+class CheckKnowUser(Action):
+
+    def name(self) -> Text:
+        return "action_check_know_user"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        
+        name_user = tracker.get_slot("name_user")
+
+        if name_user is None: 
+            return [SlotSet("name_user_set","false")]
+
+        return [SlotSet("name_user_set","true")]
+
 
 class Greet(Action):
 
@@ -92,6 +108,19 @@ class RecommendGenre(Action):
             return [SlotSet("recommend_genre", "")]
 
 
+class ResetParam(Action):
+
+    def name(self) -> Text:
+        return "action_reset_param"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+
+        return [SlotSet("another_movie", None), SlotSet("verify_movie", None),
+                 SlotSet("add_movie", None),SlotSet("aux_movie", None), SlotSet("recommend_movie_movie", None),
+                 SlotSet("recommend_genre_movie", None), SlotSet("permission_genre_movie", None)]
+
 class ValidateAddForm(FormValidationAction):
     def name(self) -> Text:
         return "validate_add_form"
@@ -105,6 +134,7 @@ class ValidateAddForm(FormValidationAction):
     ) -> Dict[Text, Any]:
 
         user = tracker.get_slot("user_data")
+        aux_movie = tracker.get_slot("aux_movie")
         movies = tracker.latest_message['movies'][0]
         sentiment = tracker.latest_message['sentiment'][0]
 
@@ -135,25 +165,27 @@ class ValidateAddForm(FormValidationAction):
             for m in user['not_care_list']:
                 print(m)
         print()
-
+        # What movie would like like to add? Tell me if you liked it or not
+        if aux_movie is not None:
+            #check
+            if str(sentiment["value"]) == "Positive":
+                dispatcher.utter_message(text=f"Great! do you like {aux_movie} or not?")
+                return {"add_movie": aux_movie, "verify_movie": None, "user_data": user}
         if not found:
-            dispatcher.utter_message(text=f"You mean '{movie}', right?")
-            return {"add_movie": movie, "another_movie": str(sentiment["value"])}
+            dispatcher.utter_message(text=f"Are you refering to {movie}?")
+            return {"add_movie": None,"verify_movie": None, "another_movie": None, "aux_movie": movie}
         else:
-
-
             if str(sentiment["value"]) == "Positive":
                 user['like_list'].append(movie)
-
+                dispatcher.utter_message(text=f"{movie} is added to your profile!")
             elif str(sentiment["value"]) == "Negative":
                 user['like_list'].append(movie)
-
+                dispatcher.utter_message(text=f"{movie} is added to your profile!")
             else:
-                user['not_care_list'].append(movie)
+                dispatcher.utter_message(text=f"I'm not sure if you like {movie} or not?")
+                return {"add_movie": movie, "verify_movie": None, "user_data": user, "aux_movie" : None}
+            return {"add_movie": movie, "verify_movie": "true", "user_data": user, "aux_movie" : None}
 
-            dispatcher.utter_message(text=f"{movie} added")
-
-            return {"add_movie": movie, "verify_movie": "true"}
 
     def validate_verify_movie(
             self,
@@ -198,23 +230,18 @@ class ValidateAddForm(FormValidationAction):
                 print(m)
         print()
 
+        
         if str(sentiment["value"]) == "Positive":
-
-            if previous_sentiment == "Positive":
-                user['like_list'].append(add_movie)
-
-            elif previous_sentiment == "Negative":
-                user['like_list'].append(add_movie)
-
-            else:
-                user['not_care_list'].append(add_movie)
-
-            dispatcher.utter_message(text=f"{add_movie} has been added.")
-            return {"verify_movie": "true", "another_movie": None}
-
+            user['like_list'].append(add_movie)
+            dispatcher.utter_message(text=f"{add_movie} has been added to your profile.")
+            return {"verify_movie": "true", "another_movie": None, "user_data": user}
+        elif str(sentiment["value"]) == "Negative":
+            user['like_list'].append(add_movie)
+            dispatcher.utter_message(text=f"{add_movie} is added to your profile!")
+            return {"verify_movie": "true", "another_movie": None, "user_data": user}
         else:
-            dispatcher.utter_message(text=f"I didn't catch that...")
-            return {"add_movie": None, "verify_movie": None}
+            dispatcher.utter_message(text=f"I didn't catch that could you say it again...")
+            return {"add_movie": add_movie, "verify_movie": None, "user_data": user}
 
 
 
@@ -243,8 +270,11 @@ class ValidateAddForm(FormValidationAction):
 
         if str(sentiment["value"]) == "Positive":
             return{"add_movie": None, "verify_movie": None, "another_movie": None}
-        if str(sentiment["value"]) == "Negative":
-            return {"another_movie": "false"}
+        else:
+            dispatcher.utter_message(text=f"Great! let me know if there is anything else I can help you with!")
+        return {"another_movie": "false"}
+        
+        
 
 class ValidateUserForm(FormValidationAction):
     def name(self) -> Text:
@@ -591,9 +621,9 @@ class ValidateMovieForm(FormValidationAction):
         print(manager)
         if user is None:
             user = dict()
-            user['like_list'] = ['The Avengers']
-            user['unlike_list'] = ['The Shining']
-            user['not_care_list'] = ['12 Angry Men']
+            user['like_list'] = []
+            user['unlike_list'] = []
+            user['not_care_list'] = []
             print("setting a value!!")
         else:
             print("already set!")
@@ -678,9 +708,9 @@ class ValidateMovieForm(FormValidationAction):
         manager = MoviesManager.getInstance()
         if user is None:
             user = dict()
-            user['like_list'] = ['The Avengers']
-            user['unlike_list'] = ['The Shining']
-            user['not_care_list'] = ['12 Angry Men']
+            user['like_list'] = []
+            user['unlike_list'] = []
+            user['not_care_list'] = []
             print("setting a value!!")
         else:
             print("already set!")
@@ -747,9 +777,9 @@ class ValidateMovieForm(FormValidationAction):
         print(manager)
         if user is None:
             user = dict()
-            user['like_list'] = ['The Avengers']
-            user['unlike_list'] = ['The Shining']
-            user['not_care_list'] = ['12 Angry Men']
+            user['like_list'] = []
+            user['unlike_list'] = []
+            user['not_care_list'] = []
             print("setting a value!!")
         else:
             print("already set!")
@@ -773,9 +803,10 @@ class ValidateMovieForm(FormValidationAction):
         if str(sentiment["value"]) == "Positive":
             user['like_list'].append(last_movie)
             dispatcher.utter_message(text=f"I am glad to hear that you like this movie! 😄")
-            return {"recommend_movie_movie": "true", "recommend_genre_movie": None, "permission_genre_movie": None}
+            return {"recommend_movie_movie": "true",  "user_data": user}
         elif str(sentiment["value"]) == "Negative":
             user['unlike_list'].append(last_movie)
+            '''
             dispatcher.utter_message(default_responses(ANOTHER))
             score, result = manager.recommend_from_user_list(user['like_list'], user['unlike_list'],
                                                              user['not_care_list'], age=int(age), gender=int(gender),
@@ -785,10 +816,13 @@ class ValidateMovieForm(FormValidationAction):
                 text=f"Here is a link to the trailer: {get_trailer_url(result.original_title.item())}")
             dispatcher.utter_message(text=f"Do you think you'll like this movie?")
             return {"check_last_movie_intent": None, "last_movie": result.original_title.item(),
-                    "recommend_movie_movie": None}
+                    "recommend_movie_movie": None, "user_data": user}
+            '''
+            dispatcher.utter_message(text=f"thanks for the feed back I will try to give a better recomendation next time!")
+            return {"recommend_movie_movie": "true",  "user_data": user}
         else:
             user['not_care_list'].append(last_movie)
-
+            '''
             dispatcher.utter_message(default_responses(ANOTHER))
             score, result = manager.recommend_from_user_list(user['like_list'], user['unlike_list'],
                                                              user['not_care_list'], age=int(age), gender=int(gender),
@@ -798,4 +832,7 @@ class ValidateMovieForm(FormValidationAction):
                 text=f"Here is a link to the trailer: {get_trailer_url(result.original_title.item())}")
             dispatcher.utter_message(text=f"Do you think you'll like this movie?")
             return {"check_last_movie_intent": None, "last_movie": result.original_title.item(),
-                    "recommend_movie_movie": None}
+                    "recommend_movie_movie": None, "user_data": user}
+            '''
+            dispatcher.utter_message(text=f"thanks for the feed back I will try to give a better recomendation next time!")
+            return {"recommend_movie_movie": "true",  "user_data": user}

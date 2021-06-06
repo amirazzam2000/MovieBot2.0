@@ -27,7 +27,7 @@ def get_gender(string: str) -> int:
 
 def get_movie_sentence(movie:str)->str:
     
-    arr_sentences = [ movie + "is really good",  
+    arr_sentences = [ movie + " is really good",  
                     movie + " is really good",
                     movie + " is very interesting",
                     movie + " is such a good movie",
