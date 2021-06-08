@@ -39,6 +39,9 @@ nlu:
     - correct
     - yes Action
     - ye
+    - I like it
+    - okay
+    - for sure 
 - intent: deny
   examples: |
     - no
@@ -49,6 +52,10 @@ nlu:
     - no way
     - not really
     - nope
+    - I don't like this
+    - not sure 
+    - I don't think so 
+    - not happening 
 - intent: mood_great
   examples: |
     - perfect
