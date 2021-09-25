@@ -2,7 +2,7 @@ import json
 import requests
 import urllib
 
-TOKEN = "1647856948:AAHQuR604ulbthVjdAFCgrROaDiq87_qxE4"
+TOKEN = "" # Insert Token Value here
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 
 
